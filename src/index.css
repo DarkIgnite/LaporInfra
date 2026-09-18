@@ -126,15 +126,13 @@
 }
 
 .custom-popup .leaflet-popup-content-wrapper {
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: white;
-  border-radius: 1.25rem;
+  background: white;
+  backdrop-filter: none;
+  color: #1e293b;
+  border-radius: 1rem;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .custom-popup .leaflet-popup-content {
@@ -143,7 +141,7 @@
 }
 
 .custom-popup .leaflet-popup-tip {
-  background: rgba(15, 23, 42, 0.95);
+  background: white;
 }
 
 /* Radar & Danger Glow Keyframes */

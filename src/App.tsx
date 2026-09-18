@@ -19,7 +19,7 @@ import { SDGInfoModal } from './components/SDGInfoModal';
 import { InfrastructureReport, AdminUser } from './types';
 import { fetchReports, subscribeToReports } from './services/api';
 import { SEED_REPORTS } from './data/seedReports';
-import { Building2, Award, Sparkles, MessageSquare, X } from 'lucide-react';
+import { Building2, Sparkles, X } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 
 export default function App() {
@@ -124,7 +124,7 @@ export default function App() {
   const activeReport = reports.find((r) => r.id === selectedReportId) || null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafaf9] text-stone-900 font-sans antialiased selection:bg-amber-600 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
       {/* Top Navigation Bar - Minimal & Streamlined */}
       <Navbar
         activeTab={activeTab}
@@ -257,16 +257,14 @@ export default function App() {
             <button
               id="floating-chat-toggle-btn"
               onClick={() => setIsFloatingChatOpen(true)}
-              className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all border border-stone-700/80 group"
+              className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xl hover:scale-105 active:scale-95 transition-all group"
             >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs group-hover:rotate-12 transition-transform">
-                <Sparkles className="h-3.5 w-3.5" />
-              </div>
-              <span className="hidden sm:inline">Tanya Asisten AI &amp; Peta</span>
-              <span className="sm:hidden">Tanya AI</span>
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:inline">Tanya Asisten AI</span>
+              <span className="sm:hidden">AI</span>
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-300 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-200"></span>
               </span>
             </button>
           )}
@@ -284,26 +282,25 @@ export default function App() {
 
       {/* Footer */}
       {activeTab !== 'peta' && (
-        <footer className="border-t border-stone-200/80 bg-white py-6 px-4 sm:px-6 lg:px-8 text-xs text-stone-500 mb-16 md:mb-0">
-          <div className="mx-auto max-w-[1280px] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <footer className="border-t border-gray-200 bg-white py-6 px-4 sm:px-6 lg:px-8 text-xs text-gray-500 mb-16 md:mb-0">
+          <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500 text-white font-black text-[10px]">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-black text-[10px]">
                 LI
               </div>
-              <span className="font-bold text-stone-800">LaporInfra</span>
-              <span className="hidden sm:inline text-stone-400">— Platform Pelaporan Kerusakan Infrastruktur Berbasis Foto &amp; AI Vision</span>
+              <span className="font-bold text-gray-800">LaporInfra</span>
+              <span className="hidden sm:inline text-gray-400">— Platform Pelaporan Kerusakan Infrastruktur Berbasis Foto & AI Vision</span>
             </div>
 
             <div className="flex items-center gap-4 text-[11px]">
               <button
                 onClick={() => setIsSDGModalOpen(true)}
-                className="font-bold text-amber-700 hover:text-amber-800 transition-colors flex items-center gap-1"
+                className="font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
               >
-                <Award className="h-3.5 w-3.5" />
-                <span>SDG 9: Industri, Inovasi &amp; Infrastruktur</span>
+                <span>SDG 9: Industri, Inovasi & Infrastruktur</span>
               </button>
-              <span className="text-stone-300">•</span>
-              <span className="text-stone-500">Google Maps Platform &amp; Gemini Multimodal</span>
+              <span className="text-gray-300">•</span>
+              <span className="text-gray-400">Google Maps Platform & Gemini AI</span>
             </div>
           </div>
         </footer>

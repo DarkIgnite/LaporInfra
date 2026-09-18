@@ -1,39 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Sparkles,
   Camera,
-  ShieldCheck,
   MapPin,
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
   Zap,
-  Activity,
-  Award,
-  Navigation,
-  Milestone,
-  Lightbulb,
-  Droplets,
-  BrainCircuit,
-  Cpu,
   ChevronRight,
-  ChevronLeft,
-  Check,
-  Car,
-  Footprints,
   Clock,
   Search,
   Building2,
-  Sliders,
-  Calendar,
-  Layers,
-  Filter,
-  Eye
+  ThumbsUp,
+  Star,
+  TrendingUp,
+  Shield,
+  Smartphone,
+  Users,
+  BarChart3,
+  Navigation2,
+  CircleAlert,
+  CircleCheck,
+  Timer
 } from 'lucide-react';
 import { InfrastructureReport } from '../types';
 import { DEMO_PRESET_IMAGES } from '../data/seedReports';
 import { formatTimeAgo } from '../utils/helpers';
-import { InteractiveLandingMap } from './InteractiveLandingMap';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface LandingPageProps {
   reports: InfrastructureReport[];
@@ -45,6 +38,170 @@ interface LandingPageProps {
   onOpenSDGModal: () => void;
 }
 
+// --- Mini Map Preview Component with Pothole Pins ---
+const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMap: () => void }> = ({
+  reports,
+  onNavigateToMap
+}) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || leafletMapRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      center: [-6.2, 106.85],
+      zoom: 11,
+      zoomControl: false,
+      scrollWheelZoom: false,
+      dragging: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      keyboard: false,
+      attributionControl: false
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© CartoDB'
+    }).addTo(map);
+
+    leafletMapRef.current = map;
+
+    // Add pothole pins
+    const pinReports = reports.slice(0, 10);
+    pinReports.forEach((report) => {
+      const severityColor =
+        report.tingkat_keparahan === 'Berat'
+          ? '#ef4444'
+          : report.tingkat_keparahan === 'Sedang'
+          ? '#f59e0b'
+          : '#22c55e';
+
+      const statusIcon = report.status === 'Selesai' ? '✓' : report.status === 'Diproses' ? '⟳' : '!';
+
+      const icon = L.divIcon({
+        className: '',
+        html: `
+          <div style="
+            width: 28px; height: 28px;
+            background: ${severityColor};
+            border: 2.5px solid white;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            display: flex; align-items: center; justify-content: center;
+          ">
+            <span style="transform: rotate(45deg); color: white; font-size: 10px; font-weight: 900; line-height: 1;">${statusIcon}</span>
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 28]
+      });
+
+      L.marker([report.location.lat, report.location.lng], { icon })
+        .addTo(map)
+        .bindTooltip(
+          `<div style="font-size:11px;font-weight:700;color:#1e293b">${report.kategori}</div><div style="font-size:10px;color:#64748b">${report.location.city || ''}</div>`,
+          { direction: 'top', offset: [0, -30] }
+        );
+    });
+
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
+  }, [reports]);
+
+  return (
+    <div className="relative w-full h-full rounded-2xl overflow-hidden">
+      <div ref={mapRef} className="w-full h-full" />
+      {/* Map overlay gradient bottom */}
+      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/60 to-transparent pointer-events-none" />
+      {/* Expand button */}
+      <button
+        onClick={onNavigateToMap}
+        className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm hover:bg-gray-50 transition-colors z-10"
+      >
+        <Navigation2 className="h-3.5 w-3.5 text-blue-500" />
+        Buka Peta Penuh
+      </button>
+      {/* Live badge */}
+      <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/95 border border-gray-200 rounded-full px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm z-10">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+        </span>
+        Live Map
+      </div>
+    </div>
+  );
+};
+
+// --- Stat Card ---
+const StatCard: React.FC<{ icon: React.ReactNode; value: string; label: string; color: string }> = ({
+  icon, value, label, color
+}) => (
+  <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 px-4 py-3 shadow-sm">
+    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${color} shrink-0`}>
+      {icon}
+    </div>
+    <div>
+      <div className="text-lg font-black text-gray-900 leading-none">{value}</div>
+      <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+    </div>
+  </div>
+);
+
+// --- Recent Report Card ---
+const RecentCard: React.FC<{ report: InfrastructureReport; onClick: () => void }> = ({ report, onClick }) => {
+  const severityBadge = {
+    Berat: 'bg-red-50 text-red-700 border-red-200',
+    Sedang: 'bg-amber-50 text-amber-700 border-amber-200',
+    Ringan: 'bg-green-50 text-green-700 border-green-200'
+  }[report.tingkat_keparahan];
+
+  const statusIcon = {
+    Baru: <CircleAlert className="h-3 w-3 text-blue-500" />,
+    Diproses: <Timer className="h-3 w-3 text-amber-500" />,
+    Selesai: <CircleCheck className="h-3 w-3 text-green-500" />
+  }[report.status];
+
+  return (
+    <button
+      onClick={onClick}
+      className="group flex items-start gap-3 p-3.5 rounded-xl hover:bg-gray-50 transition-colors text-left w-full border border-transparent hover:border-gray-200"
+    >
+      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+        <img
+          src={report.imageUrl}
+          alt={report.kategori}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className={`inline-flex items-center gap-1 text-[10px] font-bold border rounded-full px-2 py-0.5 ${severityBadge}`}>
+            {report.tingkat_keparahan}
+          </span>
+          <span className="flex items-center gap-0.5 text-[10px] text-gray-500">
+            {statusIcon}
+            {report.status}
+          </span>
+        </div>
+        <p className="text-sm font-semibold text-gray-800 truncate leading-tight">{report.kategori}</p>
+        <p className="text-xs text-gray-500 truncate mt-0.5 flex items-center gap-1">
+          <MapPin className="h-3 w-3 shrink-0" />
+          {report.location.city || report.location.address}
+        </p>
+        <p className="text-[10px] text-gray-400 mt-1">{formatTimeAgo(report.createdAt)}</p>
+      </div>
+    </button>
+  );
+};
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   reports,
   onOpenReportModal,
@@ -52,679 +209,449 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigateToList,
   onNavigateToMap,
   onSelectReport,
-  onOpenSDGModal,
+  onOpenSDGModal
 }) => {
-  // Floating Search Capsule States
-  const [selectedCity, setSelectedCity] = useState<string>('Semua Kota');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Semua Fasilitas');
-  const [selectedSeverity, setSelectedSeverity] = useState<string>('Semua Tingkat');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // AI Interactive Showcase Demo
-  const [selectedDemoIndex, setSelectedDemoIndex] = useState<number>(0);
-  const [isScanning, setIsScanning] = useState<boolean>(false);
+  const totalCount = reports.length;
+  const criticalCount = reports.filter((r) => r.tingkat_keparahan === 'Berat').length;
+  const resolvedCount = reports.filter((r) => r.status === 'Selesai').length;
+  const processingCount = reports.filter((r) => r.status === 'Diproses').length;
 
-  const aiDemoSamples = [
+  const recentReports = [...reports].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  ).slice(0, 5);
+
+  const categories = [
     {
-      id: 'demo-1',
-      title: 'Jalan Berlubang Parah',
-      location: 'Jl. Pemuda No. 84, Semarang',
-      category: 'Jalan Berlubang',
-      severity: 'Berat' as const,
-      score: 8.8,
-      image: DEMO_PRESET_IMAGES[0].url,
-      detection: {
-        damageType: 'Alligator Cracking & Deep Pothole',
-        dimensions: 'Perkiraan diameter ±85 cm, kedalaman ±12 cm',
-        dangerLevel: 'Tinggi — Risiko fatal kendaraan roda dua & patah as roda',
-        assignment: 'Dinas Bina Marga — Unit Reaksi Cepat (URC)',
-        slaRecommendation: 'Maksimal 24 Jam (Prioritas Utama)',
-        summary:
-          'Terdeteksi lubang aspal dalam dengan pelepasan agregat kasar di lajur aktif kendaraan bermotor.'
-      }
+      title: 'Jalan Berlubang',
+      desc: 'Pothole & retakan aspal di badan jalan',
+      image: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+      count: reports.filter(r => r.kategori === 'Jalan Berlubang').length || 480,
+      sla: '< 24 Jam',
+      color: 'bg-red-500'
     },
     {
-      id: 'demo-2',
-      title: 'Retak Fisik Pier Cap Jembatan',
-      location: 'Jembatan Ciliwung, Jakarta Selatan',
-      category: 'Jembatan Retak',
-      severity: 'Berat' as const,
-      score: 9.4,
-      image: DEMO_PRESET_IMAGES[1].url,
-      detection: {
-        damageType: 'Structural Shear Cracking Pier Cap',
-        dimensions: 'Panjang retakan diagonal ±2.4 meter, celah ±8 mm',
-        dangerLevel: 'Kritis — Risiko kegagalan beban jembatan & getaran tonase berat',
-        assignment: 'Dinas Bina Marga & Tim Ahli Struktur',
-        slaRecommendation: 'Maksimal 12 Jam (Inspeksi Khusus)',
-        summary:
-          'Retakan geser struktural pada tiang penopang jembatan. Memerlukan audit NDT dan perkuatan segera.'
-      }
+      title: 'Jembatan Retak',
+      desc: 'Kerusakan struktural pada jembatan',
+      image: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=600&q=80',
+      count: reports.filter(r => r.kategori === 'Jembatan Retak').length || 120,
+      sla: '< 12 Jam',
+      color: 'bg-orange-500'
     },
     {
-      id: 'demo-3',
-      title: 'Paving Trotoar Amblas & Rusak',
-      location: 'Jl. Malioboro, Yogyakarta',
-      category: 'Trotoar Rusak',
-      severity: 'Sedang' as const,
-      score: 5.6,
-      image: DEMO_PRESET_IMAGES[2].url,
-      detection: {
-        damageType: 'Paving Settlement & Broken Tactile Guiding Block',
-        dimensions: 'Area amblas ±3.5 m², ubin pemandu difabel terputus',
-        dangerLevel: 'Sedang — Bahaya tersandung pejalan kaki & disabilitas',
-        assignment: 'Dinas Cipta Karya & Tata Ruang',
-        slaRecommendation: 'Maksimal 48 Jam (Penataan Ulang)',
-        summary:
-          'Kerusakan susunan paving blok dan hilangnya continuity guiding block ramah difabel.'
-      }
+      title: 'Trotoar Rusak',
+      desc: 'Paving ambles & fasilitas difabel',
+      image: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80',
+      count: reports.filter(r => r.kategori === 'Trotoar Rusak').length || 210,
+      sla: '< 48 Jam',
+      color: 'bg-amber-500'
     },
     {
-      id: 'demo-4',
-      title: 'Penerangan Jalan (PJU) Mati',
-      location: 'Jl. Ir. H. Juanda, Bandung',
-      category: 'Lampu Jalan Mati',
-      severity: 'Sedang' as const,
-      score: 6.8,
-      image: DEMO_PRESET_IMAGES[3].url,
-      detection: {
-        damageType: 'PJU Blackout & Fixture Power Failure',
-        dimensions: 'Segmen jalan gelap gulita sepanjang ±300 meter (3 tiang padam)',
-        dangerLevel: 'Sedang-Tinggi — Risiko blindspot malam & potensi kerawanan',
-        assignment: 'Dinas Perhubungan (PJU)',
-        slaRecommendation: 'Maksimal 24 Jam',
-        summary:
-          'Lampu penerangan jalan utama padam saat malam hari, menurunkan jarak pandang pengemudi.'
-      }
+      title: 'Lampu Jalan Mati',
+      desc: 'PJU padam & kabel terbuka',
+      image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+      count: reports.filter(r => r.kategori === 'Lampu Jalan Mati').length || 340,
+      sla: '< 24 Jam',
+      color: 'bg-yellow-500'
+    },
+    {
+      title: 'Saluran Air',
+      desc: 'Drainase tersumbat & meluap',
+      image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80',
+      count: reports.filter(r => r.kategori === 'Saluran Air Tersumbat').length || 95,
+      sla: '< 48 Jam',
+      color: 'bg-blue-500'
+    },
+    {
+      title: 'Fasilitas Publik',
+      desc: 'Taman, halte, dan fasilitas umum',
+      image: 'https://images.unsplash.com/photo-1588694926280-3ae414d06ccb?auto=format&fit=crop&w=600&q=80',
+      count: reports.filter(r => r.kategori === 'Fasilitas Publik Lainnya').length || 60,
+      sla: '< 72 Jam',
+      color: 'bg-purple-500'
     }
   ];
 
-  const currentSample = aiDemoSamples[selectedDemoIndex];
-
-  const handleSelectSample = (index: number) => {
-    setIsScanning(true);
-    setSelectedDemoIndex(index);
-    setTimeout(() => {
-      setIsScanning(false);
-    }, 300);
-  };
-
-  // Filtered count based on quick search
-  const totalReportsCount = reports.length;
-  const criticalCount = reports.filter((r) => r.tingkat_keparahan === 'Berat').length;
-  const resolvedCount = reports.filter((r) => r.status === 'Selesai').length;
-
-  const handleScrollToMap = () => {
-    const el = document.getElementById('radar-map-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      onNavigateToRadar();
+  const steps = [
+    {
+      num: '1',
+      icon: <Smartphone className="h-6 w-6 text-blue-600" />,
+      title: 'Foto & Lokasi GPS',
+      desc: 'Ambil foto kerusakan infrastruktur. Koordinat GPS terkunci otomatis.',
+      color: 'bg-blue-50 border-blue-200'
+    },
+    {
+      num: '2',
+      icon: <Zap className="h-6 w-6 text-amber-600" />,
+      title: 'AI Gemini Menganalisis',
+      desc: 'Model AI mengklasifikasi jenis kerusakan, skor bahaya, dan mengarahkan ke dinas terkait.',
+      color: 'bg-amber-50 border-amber-200'
+    },
+    {
+      num: '3',
+      icon: <CheckCircle2 className="h-6 w-6 text-green-600" />,
+      title: 'Dinas Eksekusi & Update',
+      desc: 'Tim Unit Reaksi Cepat diterjunkan dan memperbarui status perbaikan secara transparan.',
+      color: 'bg-green-50 border-green-200'
     }
-  };
+  ];
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans selection:bg-amber-600 selection:text-white">
-      {/* =========================================================
-          1. SCENIC HERO SECTION (MATCHING THE UPLOADED REFERENCE DESIGN)
-         ========================================================= */}
-      <section className="relative overflow-hidden bg-[#fafaf9] pt-2 pb-14 sm:pb-20">
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-          
-          {/* Main Scenic Canvas Box with Organic Curves */}
-          <div className="relative rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden min-h-[580px] sm:min-h-[640px] flex flex-col justify-between p-6 sm:p-12 md:p-16 shadow-2xl border border-stone-200/80 bg-stone-900">
-            
-            {/* High-res Scenic Background Image */}
-            <div className="absolute inset-0 z-0">
-              <img
-                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2200&q=85"
-                alt="Infrastruktur & Lanskap Alam Indonesia"
-                className="h-full w-full object-cover object-center scale-105"
-                referrerPolicy="no-referrer"
-              />
-              {/* Soft organic light vignette */}
-              <div className="absolute inset-0 bg-linear-to-r from-stone-950/80 via-stone-950/40 to-transparent" />
-            </div>
+    <div className="min-h-screen bg-gray-50 text-gray-900">
 
-            {/* Organic Fluid Wave Frame (Left & Bottom curves like the reference) */}
-            <div className="absolute -left-12 -top-12 w-96 h-96 bg-white/20 backdrop-blur-3xl rounded-full pointer-events-none -z-0 opacity-40" />
-            <div className="absolute -bottom-24 -right-12 w-96 h-96 bg-amber-500/10 backdrop-blur-3xl rounded-full pointer-events-none -z-0" />
+      {/* ===== HERO SECTION ===== */}
+      <section className="bg-white border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-            {/* Top Sub-navigation / Brand Capsule inside Hero */}
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-1.5 shadow-xs border border-white/60">
-                <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                <span className="text-xs font-black tracking-wide text-stone-900 uppercase">
-                  LaporInfra &bull; AI Powered City Care
-                </span>
-              </div>
-
-              <div className="hidden md:flex items-center gap-2">
-                <button
-                  onClick={onOpenSDGModal}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md px-4 py-1.5 text-xs font-semibold text-white/90 border border-white/20 transition-colors"
-                >
-                  <Award className="h-3.5 w-3.5 text-amber-400" />
-                  <span>Dukung SDG 9</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Main Content: Left-Aligned Editorial Headline (Pomaii Reference Style) */}
-            <div className="relative z-10 max-w-2xl space-y-6 my-auto pt-8 pb-12">
-              <div className="space-y-3">
-                <span className="inline-block text-xs font-black tracking-[0.2em] uppercase text-amber-400 drop-shadow-xs">
-                  PARTISIPASI PUBLIK &amp; AI MULTIMODAL
-                </span>
-                
-                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] drop-shadow-md">
-                  Lapor Cepat.<br />
-                  <span className="relative inline-block text-white">
-                    Pulihkan Kota.
-                    {/* Organic warm underline like the reference */}
-                    <svg
-                      className="absolute -bottom-2.5 left-0 w-full h-3.5 text-amber-400/90"
-                      viewBox="0 0 250 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3 10.5C65 3.5 185 2 247 11"
-                        stroke="currentColor"
-                        strokeWidth="5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </span>
-                </h1>
-              </div>
-
-              <p className="text-sm sm:text-base lg:text-lg text-stone-200 font-normal leading-relaxed max-w-xl drop-shadow-xs">
-                Deteksi jalan berlubang, retak jembatan, dan penerangan padam seketika dengan <strong>Gemini AI Vision</strong>. Pantau perbaikan dinas secara transparan dalam satu radar kota terpadu.
-              </p>
-
-              {/* Warm Amber/Orange Pill Action Button (Apple Tactile Style) */}
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  id="hero-explore-now-btn"
-                  onClick={onOpenReportModal}
-                  className="apple-press inline-flex items-center gap-2 rounded-full bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-7 py-3.5 text-sm font-bold shadow-lg shadow-amber-600/30 border-t border-white/30 active:scale-95 transition-all"
-                >
-                  <span>Lapor Sekarang</span>
-                  <ArrowRight className="h-4 w-4 stroke-[2.5]" />
-                </button>
-
-                <button
-                  id="hero-open-map-btn"
-                  onClick={handleScrollToMap}
-                  className="apple-press inline-flex items-center gap-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-xl text-white border border-white/30 px-6 py-3.5 text-sm font-semibold transition-all active:scale-95"
-                >
-                  <Navigation className="h-4 w-4 text-amber-300" />
-                  <span>Buka Radar Peta</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Floating Search Capsule (Apple Translucent Material) */}
-            <div className="relative z-20 -mb-2 sm:-mb-6 pt-4">
-              <div className="apple-glass rounded-[2rem] p-3 sm:p-4 shadow-2xl text-stone-900 border border-stone-200/90">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
-                  
-                  {/* Segment 1: Where / Kota */}
-                  <div className="lg:col-span-3 px-3 py-1.5 rounded-2xl hover:bg-stone-50/80 transition-colors cursor-pointer border-b sm:border-b-0 sm:border-r border-stone-200/70">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200/60">
-                        <MapPin className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                          Wilayah / Kota
-                        </span>
-                        <select
-                          value={selectedCity}
-                          onChange={(e) => setSelectedCity(e.target.value)}
-                          className="w-full bg-transparent text-xs font-bold text-stone-800 focus:outline-hidden cursor-pointer"
-                        >
-                          <option value="Semua Kota">Semua Kota (Indonesia)</option>
-                          <option value="Semarang">Semarang</option>
-                          <option value="DKI Jakarta">DKI Jakarta</option>
-                          <option value="Bandung">Bandung</option>
-                          <option value="Yogyakarta">D.I. Yogyakarta</option>
-                          <option value="Surabaya">Surabaya</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Segment 2: Facility / Tipe Kerusakan */}
-                  <div className="lg:col-span-3 px-3 py-1.5 rounded-2xl hover:bg-stone-50/80 transition-colors cursor-pointer border-b sm:border-b-0 sm:border-r border-stone-200/70">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60">
-                        <Layers className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                          Jenis Fasilitas
-                        </span>
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full bg-transparent text-xs font-bold text-stone-800 focus:outline-hidden cursor-pointer"
-                        >
-                          <option value="Semua Fasilitas">Semua Fasilitas</option>
-                          <option value="Jalan Berlubang">Jalan Berlubang</option>
-                          <option value="Jembatan Retak">Jembatan Retak</option>
-                          <option value="Trotoar Rusak">Trotoar Rusak</option>
-                          <option value="Lampu Jalan Mati">Lampu Jalan Mati</option>
-                          <option value="Saluran Air Tersumbat">Saluran Air</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Segment 3: AI & Urgency */}
-                  <div className="lg:col-span-3 px-3 py-1.5 rounded-2xl hover:bg-stone-50/80 transition-colors cursor-pointer border-b sm:border-b-0 sm:border-r border-stone-200/70">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200/60">
-                        <Zap className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                          Tingkat Keparahan AI
-                        </span>
-                        <select
-                          value={selectedSeverity}
-                          onChange={(e) => setSelectedSeverity(e.target.value)}
-                          className="w-full bg-transparent text-xs font-bold text-stone-800 focus:outline-hidden cursor-pointer"
-                        >
-                          <option value="Semua Tingkat">Semua Tingkat Urgensi</option>
-                          <option value="Berat">Kritis / Berat (Prioritas URC)</option>
-                          <option value="Sedang">Sedang (Perhatian)</option>
-                          <option value="Ringan">Ringan (Monitoring)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Segment 4: Search Button */}
-                  <div className="lg:col-span-3 flex items-center justify-end px-2">
-                    <button
-                      onClick={handleScrollToMap}
-                      className="apple-press w-full inline-flex items-center justify-center gap-2 rounded-full bg-stone-900 hover:bg-stone-800 text-white px-6 py-3.5 text-xs font-bold shadow-md border-t border-white/20 active:scale-95 transition-all"
-                    >
-                      <Search className="h-4 w-4 text-amber-400" />
-                      <span>Cari di Radar Peta</span>
-                    </button>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-
-      {/* =========================================================
-          INTERACTIVE LIVE RADAR MAP SECTION
-         ========================================================= */}
-      <section className="py-8 sm:py-12 bg-[#fafaf9]">
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200/90 px-3.5 py-1 text-xs font-black uppercase text-amber-800 tracking-wider">
+            {/* Left: Copy */}
+            <div className="space-y-6">
+              {/* Eyebrow badge */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                 </span>
-                <span>PETA RADAR INTERAKTIF REAL-TIME</span>
+                Platform Pelaporan Infrastruktur Berbasis AI
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-stone-900 tracking-tight">
-                Pantau Sebaran Titik Kerusakan Kota
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 max-w-2xl">
-                Eksplorasi laporan masyarakat secara spasial. Dilengkapi pergantian gaya peta (radar gelap, satelit, standar), pendeteksi GPS terdekat, dan pratinjau tiket instan.
-              </p>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onNavigateToMap}
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-stone-800 hover:text-amber-600 transition-colors"
-              >
-                <span>Buka Mode Peta Penuh</span>
-                <ChevronRight className="h-4 w-4 text-amber-500" />
-              </button>
-            </div>
-          </div>
-
-          {/* Interactive Map Component with current filter props */}
-          <InteractiveLandingMap
-            reports={reports}
-            onSelectReport={onSelectReport}
-            onNavigateToMap={onNavigateToMap}
-            onOpenReportModal={onOpenReportModal}
-            initialCity={selectedCity}
-            initialCategory={selectedCategory}
-            initialSeverity={selectedSeverity}
-          />
-        </div>
-      </section>
-
-
-      {/* =========================================================
-          2. THE AI SPOTLIGHT & INSPECTOR PLAYGROUND
-         ========================================================= */}
-      <section className="py-12 sm:py-16 bg-white border-y border-stone-200/80">
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8 space-y-10">
-          
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div className="space-y-2 max-w-xl">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-800">
-                <BrainCircuit className="h-3.5 w-3.5 text-amber-600" />
-                <span>Teknologi Vision &bull; Powered by Gemini AI</span>
+              <div>
+                <h1 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight tracking-tight">
+                  Laporkan Kerusakan
+                  <br />
+                  <span className="text-blue-600">Infrastruktur Kota</span>
+                  <br />
+                  dengan Mudah
+                </h1>
+                <p className="mt-4 text-base text-gray-600 leading-relaxed max-w-lg">
+                  Foto jalan berlubang, jembatan retak, atau lampu padam — <strong>AI Gemini</strong> langsung menganalisis dan meneruskan laporan ke dinas terkait.
+                </p>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
-                Inspeksi Kerusakan Cerdas Tanpa Istilah Rumit
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                Cukup ambil foto di jalan, model AI mengekstraksi tipe degradasi fisik, menghitung skor bahaya (1–10), dan mengarahkan tiket ke dinas pelaksana dalam hitungan detik.
-              </p>
-            </div>
 
-            {/* Sample Selector Buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0">
-              {aiDemoSamples.map((sample, idx) => (
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap items-center gap-3">
                 <button
-                  key={sample.id}
-                  onClick={() => handleSelectSample(idx)}
-                  className={`apple-press px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                    selectedDemoIndex === idx
-                      ? 'bg-stone-900 text-white shadow-md border-t border-white/25'
-                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                  }`}
+                  onClick={onOpenReportModal}
+                  className="inline-flex items-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-sm font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all"
                 >
-                  <span>{sample.category}</span>
-                  {selectedDemoIndex === idx && <Check className="h-3 w-3 text-amber-400 stroke-[3]" />}
+                  <Camera className="h-4 w-4" />
+                  Lapor Sekarang
                 </button>
-              ))}
+                <button
+                  onClick={onNavigateToMap}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 text-sm font-semibold active:scale-95 transition-all"
+                >
+                  <MapPin className="h-4 w-4 text-blue-500" />
+                  Lihat Peta Radar
+                </button>
+              </div>
+
+              {/* Quick stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                <StatCard
+                  icon={<BarChart3 className="h-4 w-4 text-blue-600" />}
+                  value={String(totalCount || '1.1K+')}
+                  label="Total Laporan"
+                  color="bg-blue-50"
+                />
+                <StatCard
+                  icon={<AlertTriangle className="h-4 w-4 text-red-600" />}
+                  value={String(criticalCount || '240+')}
+                  label="Kritis / Berat"
+                  color="bg-red-50"
+                />
+                <StatCard
+                  icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}
+                  value={String(resolvedCount || '680+')}
+                  label="Selesai Diperbaiki"
+                  color="bg-green-50"
+                />
+                <StatCard
+                  icon={<Clock className="h-4 w-4 text-amber-600" />}
+                  value={String(processingCount || '180+')}
+                  label="Sedang Diproses"
+                  color="bg-amber-50"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* 2-Column AI Vision Inspector Card */}
-          <div className="rounded-3xl bg-stone-900 text-white p-5 sm:p-8 border border-stone-800 shadow-xl space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              
-              {/* Left Column: Image with AI Bounding Box Overlay */}
-              <div className="lg:col-span-6">
-                <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-stone-950 border border-stone-800 shadow-inner">
-                  <img
-                    src={currentSample.image}
-                    alt={currentSample.title}
-                    className={`h-full w-full object-cover transition-opacity duration-300 ${
-                      isScanning ? 'opacity-40 scale-105' : 'opacity-100 scale-100'
-                    }`}
-                    referrerPolicy="no-referrer"
-                  />
-
-                  {/* AI HUD Scanner Bounding Box */}
-                  <div className="absolute inset-8 sm:inset-12 border-2 border-dashed border-amber-400/90 rounded-xl pointer-events-none flex flex-col justify-between p-3.5 bg-amber-500/5 backdrop-blur-[1px]">
-                    <div className="flex justify-between items-start">
-                      <span className="bg-amber-400 text-stone-950 text-[10px] font-black px-2 py-0.5 rounded shadow-xs uppercase tracking-wider flex items-center gap-1">
-                        <Cpu className="h-3 w-3" />
-                        AI DETECT: {currentSample.category}
-                      </span>
-                      <span className="bg-black/75 text-amber-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-amber-400/30">
-                        CONFIDENCE: 98.6%
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-end">
-                      <span className="text-[10px] text-white/90 font-mono bg-black/70 px-2 py-0.5 rounded">
-                        SKOR: {currentSample.score} / 10
-                      </span>
-                      <span className="text-[10px] text-amber-300 font-bold bg-amber-950/90 px-2 py-0.5 rounded border border-amber-500/40">
-                        {currentSample.severity} Level
-                      </span>
-                    </div>
+            {/* Right: Mini Map Preview */}
+            <div className="relative">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+                {/* Map header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-red-500" />
+                    <span className="text-sm font-semibold text-gray-800">Peta Kerusakan Real-Time</span>
                   </div>
-
-                  {/* Location Chip */}
-                  <div className="absolute bottom-3 left-3 right-3 bg-stone-950/90 backdrop-blur-md rounded-xl p-2.5 border border-stone-700/80 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 truncate">
-                      <MapPin className="h-3.5 w-3.5 text-rose-400 shrink-0" />
-                      <span className="font-semibold text-stone-200 truncate">{currentSample.location}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-amber-400 shrink-0">Terverifikasi GPS</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-500">{reports.length} titik aktif</span>
                   </div>
+                </div>
+
+                {/* Map */}
+                <div className="h-64 sm:h-80 relative">
+                  <MiniMapPreview reports={reports} onNavigateToMap={onNavigateToMap} />
+                </div>
+
+                {/* Legend */}
+                <div className="flex items-center justify-center gap-4 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-gray-600">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-500 shrink-0" />Berat
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500 shrink-0" />Sedang
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-green-500 shrink-0" />Ringan
+                  </span>
                 </div>
               </div>
 
-              {/* Right Column: AI Structured Extraction Data */}
-              <div className="lg:col-span-6 space-y-4">
-                <div className="flex items-start justify-between border-b border-stone-800 pb-3">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
-                      Hasil Analisis Multimodal AI
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mt-0.5">
-                      {currentSample.title}
-                    </h3>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-black text-amber-400 font-mono">
-                      {currentSample.score}
-                      <span className="text-xs text-stone-400 font-normal">/10</span>
+              {/* Floating recent activity */}
+              <div className="absolute -bottom-4 -left-4 hidden lg:block bg-white border border-gray-200 rounded-xl shadow-md p-3 w-52">
+                <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
+                  Terbaru hari ini
+                </p>
+                {recentReports.slice(0, 2).map((r) => (
+                  <div key={r.id} className="flex items-center gap-2 py-1">
+                    <img
+                      src={r.imageUrl}
+                      alt={r.kategori}
+                      className="h-7 w-7 rounded-lg object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold text-gray-800 truncate">{r.kategori}</p>
+                      <p className="text-[9px] text-gray-400">{r.location.city}</p>
                     </div>
-                    <span className="text-[10px] text-stone-400 font-semibold">Skor Urgensi</span>
                   </div>
-                </div>
-
-                {/* AI Summary Quote */}
-                <div className="rounded-2xl bg-stone-950/80 p-4 border border-stone-800 text-xs text-stone-300 leading-relaxed italic">
-                  "{currentSample.detection.summary}"
-                </div>
-
-                {/* Structured Extraction Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                  <div className="rounded-xl bg-stone-800/60 p-3 border border-stone-700/60">
-                    <span className="text-[10px] text-stone-400 font-bold uppercase">Klasifikasi Sipil</span>
-                    <p className="font-bold text-stone-200 mt-0.5">{currentSample.detection.damageType}</p>
-                  </div>
-
-                  <div className="rounded-xl bg-stone-800/60 p-3 border border-stone-700/60">
-                    <span className="text-[10px] text-stone-400 font-bold uppercase">Estimasi Dimensi</span>
-                    <p className="font-bold text-stone-200 mt-0.5">{currentSample.detection.dimensions}</p>
-                  </div>
-
-                  <div className="rounded-xl bg-stone-800/60 p-3 border border-stone-700/60 sm:col-span-2">
-                    <span className="text-[10px] text-rose-400 font-bold uppercase">Tingkat Bahaya Lalu Lintas</span>
-                    <p className="font-bold text-stone-200 mt-0.5">{currentSample.detection.dangerLevel}</p>
-                  </div>
-
-                  <div className="rounded-xl bg-stone-800/60 p-3 border border-stone-700/60">
-                    <span className="text-[10px] text-amber-400 font-bold uppercase">Instansi Pelaksana</span>
-                    <p className="font-bold text-stone-200 mt-0.5">{currentSample.detection.assignment}</p>
-                  </div>
-
-                  <div className="rounded-xl bg-stone-800/60 p-3 border border-stone-700/60">
-                    <span className="text-[10px] text-emerald-400 font-bold uppercase">Target Respons (SLA)</span>
-                    <p className="font-bold text-stone-200 mt-0.5">{currentSample.detection.slaRecommendation}</p>
-                  </div>
-                </div>
-
-                {/* Direct Action */}
-                <div className="pt-2 flex items-center justify-between gap-3">
-                  <span className="text-xs text-stone-400">Siap mencoba kamera AI di lokasi Anda?</span>
-                  <button
-                    onClick={onOpenReportModal}
-                    className="inline-flex items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-md active:scale-95 transition-all"
-                  >
-                    <Camera className="h-4 w-4" />
-                    <span>Lapor dengan Kamera</span>
-                  </button>
-                </div>
-
+                ))}
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </section>
 
 
-      {/* =========================================================
-          3. CATEGORIES SECTION (PORTRAIT CARDS WITH CLEAN PHOTOGRAPHY)
-         ========================================================= */}
-      <section className="py-14 sm:py-20 bg-[#fafaf9]">
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8 space-y-8">
-          
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <span className="text-xs font-black tracking-widest uppercase text-amber-600">
-                CAKUPAN INFRASTRUKTUR
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mt-1">
-                Kategori Laporan Utama
-              </h2>
+      {/* ===== SEARCH BAR ===== */}
+      <section className="bg-white border-b border-gray-100 sticky top-16 z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Cari laporan: jalan berlubang, Semarang, dll…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') onNavigateToList(); }}
+                className="w-full pl-9 pr-4 py-2.5 text-sm rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400"
+              />
             </div>
-
             <button
               onClick={onNavigateToList}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-stone-900 hover:text-amber-600 transition-colors"
+              className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white hover:bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors whitespace-nowrap"
             >
-              <span>Lihat Semua Laporan ({reports.length})</span>
-              <ChevronRight className="h-4 w-4" />
+              <Search className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Cari</span>
             </button>
           </div>
+        </div>
+      </section>
 
-          {/* 4 Portrait Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              {
-                title: 'Jalan Berlubang & Amblas',
-                category: 'Jalan Berlubang',
-                count: '480+ Laporan',
-                image: DEMO_PRESET_IMAGES[0].url,
-                sla: 'SLA < 24 Jam',
-                color: 'text-blue-500'
-              },
-              {
-                title: 'Retak Fisik Jembatan',
-                category: 'Jembatan Retak',
-                count: '120+ Laporan',
-                image: DEMO_PRESET_IMAGES[1].url,
-                sla: 'SLA < 12 Jam (Kritis)',
-                color: 'text-rose-500'
-              },
-              {
-                title: 'Trotoar & Fasilitas Difabel',
-                category: 'Trotoar Rusak',
-                count: '210+ Laporan',
-                image: DEMO_PRESET_IMAGES[2].url,
-                sla: 'SLA < 48 Jam',
-                color: 'text-amber-500'
-              },
-              {
-                title: 'Penerangan Jalan (PJU) Mati',
-                category: 'Lampu Jalan Mati',
-                count: '340+ Laporan',
-                image: DEMO_PRESET_IMAGES[3].url,
-                sla: 'SLA < 24 Jam',
-                color: 'text-yellow-500'
-              }
-            ].map((item) => (
-              <div
-                key={item.title}
-                onClick={onOpenReportModal}
-                className="group relative aspect-3/4 rounded-3xl overflow-hidden bg-stone-900 text-white cursor-pointer shadow-md hover:shadow-xl transition-all flex flex-col justify-between p-5"
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-75"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent" />
 
-                {/* Top Badge */}
-                <div className="relative z-10">
-                  <span className="rounded-full bg-white/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-stone-950 shadow-xs">
-                    {item.sla}
-                  </span>
+      {/* ===== RECENT REPORTS + CATEGORIES ===== */}
+      <section className="py-10 sm:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            {/* Left: Recent Reports */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                  <h2 className="text-base font-bold text-gray-900">Laporan Terbaru</h2>
+                  <button
+                    onClick={onNavigateToList}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    Lihat semua <ChevronRight className="h-3 w-3" />
+                  </button>
                 </div>
+                <div className="divide-y divide-gray-50 px-2 py-1">
+                  {recentReports.map((report) => (
+                    <RecentCard
+                      key={report.id}
+                      report={report}
+                      onClick={() => onSelectReport(report.id)}
+                    />
+                  ))}
+                </div>
+                <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+                  <button
+                    onClick={onNavigateToList}
+                    className="w-full text-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    Lihat semua laporan →
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                {/* Bottom Card Meta */}
-                <div className="relative z-10 space-y-1">
-                  <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors leading-snug">
-                    {item.title}
-                  </h3>
-                  <div className="flex items-center justify-between text-xs text-stone-300 pt-1">
-                    <span>{item.count}</span>
-                    <span className="text-amber-400 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-0.5">
-                      Lapor <ChevronRight className="h-3 w-3" />
-                    </span>
+            {/* Right: Category Cards */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-bold text-gray-900">Kategori Kerusakan</h2>
+                <button
+                  onClick={onOpenReportModal}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  + Buat Laporan Baru
+                </button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.title}
+                    onClick={onOpenReportModal}
+                    className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
+                  >
+                    <div className="aspect-video relative overflow-hidden">
+                      <img
+                        src={cat.image}
+                        alt={cat.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <span className={`absolute top-2 right-2 ${cat.color} text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full`}>
+                        SLA {cat.sla}
+                      </span>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-sm font-bold text-gray-900 leading-tight">{cat.title}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-snug">{cat.desc}</p>
+                      <p className="text-xs font-semibold text-blue-600 mt-1.5">{cat.count}+ laporan</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      {/* ===== HOW IT WORKS ===== */}
+      <section className="py-12 sm:py-16 bg-white border-t border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-xs font-black tracking-widest uppercase text-blue-600 mb-2">Cara Kerja</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-900">Pelaporan Semudah 1-2-3</h2>
+            <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">Dari jalan rusak hingga selesai diperbaiki, tanpa birokrasi manual.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {steps.map((step, idx) => (
+              <div key={step.num} className="relative">
+                {idx < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-full w-full h-px bg-gray-200 z-0 -translate-x-1/2" />
+                )}
+                <div className={`relative bg-white rounded-2xl border ${step.color} p-6 space-y-4 z-10`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${step.color}`}>
+                      {step.icon}
+                    </div>
+                    <span className="text-3xl font-black text-gray-200">{step.num}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900">{step.title}</h3>
+                    <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
+          <div className="mt-10 text-center">
+            <button
+              onClick={onOpenReportModal}
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 text-sm font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+            >
+              <Camera className="h-4 w-4" />
+              Mulai Lapor Sekarang — Gratis
+            </button>
+          </div>
         </div>
       </section>
 
 
-      {/* =========================================================
-          4. 3 SIMPLE STEPS TO REPORT
-         ========================================================= */}
-      <section className="py-14 sm:py-18 bg-white border-t border-stone-200/80">
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8 space-y-10">
-          
-          <div className="text-center max-w-xl mx-auto space-y-2">
-            <span className="text-xs font-black tracking-widest uppercase text-amber-600">
-              ALUR TRANSPARAN
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-              Pelaporan Semudah 1-2-3
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-500">
-              Dari jalan rusak hingga perbaikan selesai tanpa birokrasi manual.
-            </p>
-          </div>
-
+      {/* ===== TRUST / SOCIAL PROOF ===== */}
+      <section className="py-12 bg-gray-50 border-t border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-3xl bg-[#fafaf9] p-6 border border-stone-200/90 space-y-3">
-              <div className="h-10 w-10 rounded-2xl bg-stone-900 text-white flex items-center justify-center font-bold text-sm">
-                1
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-start gap-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 shrink-0">
+                <Shield className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">Jepret Foto &amp; Lokasi GPS</h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Buka kamera aplikasi saat melihat jalan rusak. Koordinat presisi dan nama jalan terkunci secara otomatis.
-              </p>
+              <div>
+                <h3 className="font-bold text-gray-900 text-sm">Data Transparan</h3>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Semua laporan publik dan terverifikasi. Status update dari dinas secara real-time.</p>
+              </div>
             </div>
-
-            <div className="rounded-3xl bg-[#fafaf9] p-6 border border-stone-200/90 space-y-3">
-              <div className="h-10 w-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm">
-                2
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-start gap-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 shrink-0">
+                <Zap className="h-6 w-6 text-amber-600" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">AI Gemini Menganalisis</h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Model AI membaca foto, mengklasifikasi tingkat keparahan, serta menerbitkan nomor tiket publik instan.
-              </p>
+              <div>
+                <h3 className="font-bold text-gray-900 text-sm">AI Vision Instan</h3>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Gemini AI menganalisis foto dalam detik — mengklasifikasi jenis dan tingkat bahaya.</p>
+              </div>
             </div>
-
-            <div className="rounded-3xl bg-[#fafaf9] p-6 border border-stone-200/90 space-y-3">
-              <div className="h-10 w-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
-                3
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex items-start gap-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 shrink-0">
+                <Users className="h-6 w-6 text-green-600" />
               </div>
-              <h3 className="text-base font-bold text-stone-900">Dinas Eksekusi Perbaikan</h3>
-              <p className="text-xs text-stone-600 leading-relaxed">
-                Tim Unit Reaksi Cepat dikerahkan ke lokasi dan memutakhirkan status perbaikan secara transparan.
-              </p>
+              <div>
+                <h3 className="font-bold text-gray-900 text-sm">Komunitas Aktif</h3>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Ribuan warga dan petugas dinas berkolaborasi memperbaiki infrastruktur kota.</p>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
+
+      {/* ===== CTA BOTTOM BANNER ===== */}
+      <section className="bg-blue-600 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl font-black text-white mb-3">
+            Ada jalan berlubang di dekat kamu?
+          </h2>
+          <p className="text-blue-100 text-sm mb-8 max-w-md mx-auto">
+            Laporkan sekarang. Butuh waktu kurang dari 1 menit. AI kami langsung menangani sisanya.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={onOpenReportModal}
+              className="inline-flex items-center gap-2 rounded-full bg-white text-blue-700 hover:bg-blue-50 px-8 py-3.5 text-sm font-bold shadow-lg active:scale-95 transition-all"
+            >
+              <Camera className="h-4 w-4" />
+              Lapor dengan Kamera
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={onNavigateToMap}
+              className="inline-flex items-center gap-2 rounded-full border border-blue-400 bg-transparent hover:bg-blue-700 text-white px-7 py-3.5 text-sm font-semibold active:scale-95 transition-all"
+            >
+              <MapPin className="h-4 w-4" />
+              Buka Peta Radar
+            </button>
+          </div>
         </div>
       </section>
 
