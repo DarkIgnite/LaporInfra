@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        "read": "true",
+        "write": "request.auth != null && request.auth.uid == $uid"
+      }
+    },
+    "reports": {
+      "$reportId": {
+        "read": "true",
+        "write": "true"
+      }
+    }
+  }
+}

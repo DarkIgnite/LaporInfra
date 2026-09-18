@@ -1,0 +1,11 @@
+{
+  "name": "LaporInfra",
+  "description": "Platform pelaporan kerusakan infrastruktur publik berbasis foto dan AI Gemini untuk mendukung SDG 9.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
