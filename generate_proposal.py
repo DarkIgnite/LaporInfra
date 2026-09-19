@@ -3,7 +3,7 @@ import docx
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
 
@@ -22,22 +22,89 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
         tcMar.append(node)
     tcPr.append(tcMar)
 
+def add_page_number_to_run(run):
+    """Add a dynamic Word PAGE field."""
+    fldChar1 = OxmlElement('w:fldChar')
+    fldChar1.set(qn('w:fldCharType'), 'begin')
+    instrText = OxmlElement('w:instrText')
+    instrText.set(qn('xml:space'), 'preserve')
+    instrText.text = "PAGE"
+    fldChar2 = OxmlElement('w:fldChar')
+    fldChar2.set(qn('w:fldCharType'), 'separate')
+    fldChar3 = OxmlElement('w:fldChar')
+    fldChar3.set(qn('w:fldCharType'), 'end')
+    
+    r = run._r
+    r.append(fldChar1)
+    r.append(instrText)
+    r.append(fldChar2)
+    r.append(fldChar3)
+
 def create_proposal():
     doc = Document()
 
-    # Page Margins: Standard Academic 2.54 cm (1 inch)
+    # Page Margins: Standard Academic 2.54 cm (1 inch), left 3 cm
     for section in doc.sections:
         section.top_margin = Inches(1.0)
         section.bottom_margin = Inches(1.0)
         section.left_margin = Inches(1.18) # ~3 cm
         section.right_margin = Inches(1.0)
+        # Cover page has no header/footer
+        section.different_first_page_header_footer = True
+        
+        # Header for page 2+
+        header = section.header
+        p_hdr = header.paragraphs[0]
+        p_hdr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_hdr.paragraph_format.space_after = Pt(4)
+        r_hdr = p_hdr.add_run("Proposal INFINITERA 2.0 – Tim nama timnya apa pin | SMK Telkom Banjarbaru")
+        r_hdr.font.name = 'Times New Roman'
+        r_hdr.font.size = Pt(8.5)
+        r_hdr.font.color.rgb = RGBColor(0x9C, 0xA3, 0xAF)
 
-    # Set normal style to Times New Roman 12 pt
-    style = doc.styles['Normal']
-    font = style.font
-    font.name = 'Times New Roman'
-    font.size = Pt(12)
-    font.color.rgb = RGBColor(0x1F, 0x24, 0x21) # dark charcoal
+        # Footer for page 2+ (Page number)
+        footer = section.footer
+        p_ftr = footer.paragraphs[0]
+        p_ftr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        r_ftr_lbl = p_ftr.add_run("Halaman ")
+        r_ftr_lbl.font.name = 'Times New Roman'
+        r_ftr_lbl.font.size = Pt(10)
+        r_ftr_lbl.font.color.rgb = RGBColor(0x6B, 0x72, 0x80)
+        r_ftr_num = p_ftr.add_run()
+        r_ftr_num.font.name = 'Times New Roman'
+        r_ftr_num.font.size = Pt(10)
+        r_ftr_num.font.bold = True
+        r_ftr_num.font.color.rgb = RGBColor(0x1F, 0x24, 0x21)
+        add_page_number_to_run(r_ftr_num)
+
+    # Base Normal Style
+    normal_style = doc.styles['Normal']
+    normal_font = normal_style.font
+    normal_font.name = 'Times New Roman'
+    normal_font.size = Pt(12)
+    normal_font.color.rgb = RGBColor(0x1F, 0x24, 0x21)
+
+    # Configure Official Word Heading Styles (Times New Roman, Bold, Black RGB 0,0,0)
+    h1_style = doc.styles['Heading 1']
+    h1_font = h1_style.font
+    h1_font.name = 'Times New Roman'
+    h1_font.size = Pt(14)
+    h1_font.bold = True
+    h1_font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+
+    h2_style = doc.styles['Heading 2']
+    h2_font = h2_style.font
+    h2_font.name = 'Times New Roman'
+    h2_font.size = Pt(12)
+    h2_font.bold = True
+    h2_font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+
+    h3_style = doc.styles['Heading 3']
+    h3_font = h3_style.font
+    h3_font.name = 'Times New Roman'
+    h3_font.size = Pt(12)
+    h3_font.bold = True
+    h3_font.color.rgb = RGBColor(0x00, 0x00, 0x00)
 
     # ==========================================
     # COVER PAGE
@@ -54,7 +121,7 @@ def create_proposal():
     p_title = doc.add_paragraph()
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.paragraph_format.space_before = Pt(12)
-    p_title.paragraph_format.space_after = Pt(20)
+    p_title.paragraph_format.space_after = Pt(18)
     run_title = p_title.add_run("LAPORINFRA: SISTEM PELAPORAN DAN PEMANTAUAN KERUSAKAN INFRASTRUKTUR BERBASIS MULTIMODAL VISION AI DAN GEOSPASIAL GUNA MEWUJUDKAN SMART SUSTAINABLE CITIES")
     run_title.font.name = 'Times New Roman'
     run_title.font.size = Pt(13)
@@ -65,8 +132,8 @@ def create_proposal():
     logo_path = r"C:\Users\ryanf\Downloads\images (4).jpg"
     p_logo = doc.add_paragraph()
     p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_logo.paragraph_format.space_before = Pt(10)
-    p_logo.paragraph_format.space_after = Pt(24)
+    p_logo.paragraph_format.space_before = Pt(8)
+    p_logo.paragraph_format.space_after = Pt(20)
     if os.path.exists(logo_path):
         p_logo.add_run().add_picture(logo_path, width=Inches(2.2))
     else:
@@ -76,8 +143,8 @@ def create_proposal():
     # Diusulkan oleh:
     p_by = doc.add_paragraph()
     p_by.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_by.paragraph_format.space_before = Pt(16)
-    p_by.paragraph_format.space_after = Pt(6)
+    p_by.paragraph_format.space_before = Pt(14)
+    p_by.paragraph_format.space_after = Pt(4)
     run_by = p_by.add_run("Diusulkan oleh:")
     run_by.font.name = 'Times New Roman'
     run_by.font.size = Pt(12)
@@ -95,7 +162,7 @@ def create_proposal():
     p_members = doc.add_paragraph()
     p_members.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_members.paragraph_format.space_before = Pt(2)
-    p_members.paragraph_format.space_after = Pt(36)
+    p_members.paragraph_format.space_after = Pt(32)
     p_members.paragraph_format.line_spacing = 1.3
     run_m1 = p_members.add_run("Ryan Fadhila Ahmad – 543251045 (Ketua Tim)\n")
     run_m1.font.name = 'Times New Roman'
@@ -106,7 +173,7 @@ def create_proposal():
 
     p_inst = doc.add_paragraph()
     p_inst.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_inst.paragraph_format.space_before = Pt(20)
+    p_inst.paragraph_format.space_before = Pt(18)
     p_inst.paragraph_format.space_after = Pt(0)
     run_inst = p_inst.add_run("SMK TELKOM BANJARBARU\n2026")
     run_inst.font.name = 'Times New Roman'
@@ -116,78 +183,33 @@ def create_proposal():
     doc.add_page_break()
 
     # ==========================================
-    # DAFTAR ISI
+    # HELPER FORMATTING FUNCTIONS WITH REAL STYLES
     # ==========================================
-    p_di = doc.add_paragraph()
-    p_di.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p_di.paragraph_format.space_before = Pt(12)
-    p_di.paragraph_format.space_after = Pt(24)
-    run_di = p_di.add_run("DAFTAR ISI")
-    run_di.font.name = 'Times New Roman'
-    run_di.font.size = Pt(14)
-    run_di.font.bold = True
-
-    toc_items = [
-        ("HALAMAN JUDUL", "i"),
-        ("DAFTAR ISI", "ii"),
-        ("BAB I PENDAHULUAN", "1"),
-        ("    1.1 Latar Belakang", "1"),
-        ("    1.2 Tujuan", "2"),
-        ("    1.3 Manfaat", "2"),
-        ("BAB II PEMBAHASAN DAN PERANCANGAN SISTEM", "4"),
-        ("    2.1 Penjelasan tentang Website", "4"),
-        ("    2.2 Metode Pengembangan/Perancangan", "5"),
-        ("    2.3 Teknologi/Tools yang Digunakan", "6"),
-        ("    2.4 Arsitektur Sistem / User Flow", "7"),
-        ("    2.5 Fitur dan Fungsi", "8"),
-        ("    2.6 Permasalahan dan Solusi", "10"),
-        ("        2.6.1 Analisis Permasalahan", "10"),
-        ("        2.6.2 Strategi Solusi", "11"),
-        ("    2.7 Dampak dan Implementasi", "12"),
-        ("BAB III PENUTUP", "14"),
-        ("DAFTAR PUSTAKA", "15"),
-        ("LAMPIRAN", "16")
-    ]
-
-    p_toc = doc.add_paragraph()
-    p_toc.paragraph_format.line_spacing = 1.25
-    p_toc.paragraph_format.space_after = Pt(18)
-    for title, page_num in toc_items:
-        r_title = p_toc.add_run(f"{title}")
-        r_title.font.name = 'Times New Roman'
-        r_title.font.size = Pt(11)
-        if "BAB" in title or title in ["HALAMAN JUDUL", "DAFTAR ISI", "DAFTAR PUSTAKA", "LAMPIRAN"]:
-            r_title.font.bold = True
-        dots_len = max(3, 75 - len(title) - len(page_num))
-        r_dots = p_toc.add_run(" " + "." * dots_len + " ")
-        r_dots.font.name = 'Times New Roman'
-        r_dots.font.size = Pt(10)
-        r_dots.font.color.rgb = RGBColor(0x9C, 0xA3, 0xAF)
-        r_num = p_toc.add_run(f"{page_num}\n")
-        r_num.font.name = 'Times New Roman'
-        r_num.font.size = Pt(11)
-        if "BAB" in title or title in ["HALAMAN JUDUL", "DAFTAR ISI"]:
-            r_num.font.bold = True
-
-    doc.add_page_break()
-
-    # ==========================================
-    # HELPER FORMATTING FUNCTIONS
-    # ==========================================
-    def add_h1(text):
-        p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(16)
-        p.paragraph_format.space_after = Pt(8)
-        p.paragraph_format.keep_with_next = True
-        r = p.add_run(text)
-        r.font.name = 'Times New Roman'
-        r.font.size = Pt(14)
-        r.font.bold = True
+    def add_h1(title, subtitle=None):
+        """Major Chapter Heading (Heading 1) - Centered, 14pt Bold, Black."""
+        p = doc.add_paragraph(style='Heading 1')
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_before = Pt(18)
+        p.paragraph_format.space_after = Pt(12)
+        p.paragraph_format.keep_with_next = True
+        r1 = p.add_run(title)
+        r1.font.name = 'Times New Roman'
+        r1.font.size = Pt(14)
+        r1.font.bold = True
+        r1.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
+        if subtitle:
+            r1.add_break()
+            r2 = p.add_run(subtitle)
+            r2.font.name = 'Times New Roman'
+            r2.font.size = Pt(14)
+            r2.font.bold = True
+            r2.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
         return p
 
     def add_h2(text):
-        p = doc.add_paragraph()
+        """Sub-chapter Heading (Heading 2) - Left-aligned, 12pt Bold, Black."""
+        p = doc.add_paragraph(style='Heading 2')
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         p.paragraph_format.space_before = Pt(14)
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.keep_with_next = True
@@ -195,10 +217,13 @@ def create_proposal():
         r.font.name = 'Times New Roman'
         r.font.size = Pt(12)
         r.font.bold = True
+        r.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
         return p
 
     def add_h3(text):
-        p = doc.add_paragraph()
+        """Sub-sub-chapter Heading (Heading 3) - Left-aligned, 12pt Bold, Black."""
+        p = doc.add_paragraph(style='Heading 3')
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         p.paragraph_format.space_before = Pt(10)
         p.paragraph_format.space_after = Pt(3)
         p.paragraph_format.keep_with_next = True
@@ -206,6 +231,7 @@ def create_proposal():
         r.font.name = 'Times New Roman'
         r.font.size = Pt(12)
         r.font.bold = True
+        r.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
         return p
 
     def add_body(text, space_after=6, indent=0.4):
@@ -228,15 +254,66 @@ def create_proposal():
         r_bold.font.name = 'Times New Roman'
         r_bold.font.size = Pt(12)
         r_bold.font.bold = True
+        r_bold.font.color.rgb = RGBColor(0x00, 0x00, 0x00)
         r_text = p.add_run(text)
         r_text.font.name = 'Times New Roman'
         r_text.font.size = Pt(12)
         return p
 
     # ==========================================
-    # BAB I: PENDAHULUAN
+    # DAFTAR ISI (Heading 1)
     # ==========================================
-    add_h1("BAB I\nPENDAHULUAN")
+    add_h1("DAFTAR ISI")
+
+    toc_items = [
+        ("HALAMAN JUDUL", "i"),
+        ("DAFTAR ISI", "ii"),
+        ("BAB I PENDAHULUAN", "1"),
+        ("    1.1 Latar Belakang", "1"),
+        ("    1.2 Tujuan", "2"),
+        ("    1.3 Manfaat", "2"),
+        ("BAB II PEMBAHASAN DAN PERANCANGAN SISTEM", "3"),
+        ("    2.1 Penjelasan tentang Website", "3"),
+        ("    2.2 Metode Pengembangan/Perancangan", "3"),
+        ("    2.3 Teknologi/Tools yang Digunakan", "4"),
+        ("    2.4 Arsitektur Sistem / User Flow", "5"),
+        ("    2.5 Fitur dan Fungsi", "6"),
+        ("    2.6 Permasalahan dan Solusi", "7"),
+        ("        2.6.1 Analisis Permasalahan", "7"),
+        ("        2.6.2 Strategi Solusi", "7"),
+        ("    2.7 Dampak dan Implementasi", "8"),
+        ("BAB III PENUTUP", "9"),
+        ("DAFTAR PUSTAKA", "10"),
+        ("LAMPIRAN", "11")
+    ]
+
+    p_toc = doc.add_paragraph()
+    p_toc.paragraph_format.line_spacing = 1.25
+    p_toc.paragraph_format.space_before = Pt(8)
+    p_toc.paragraph_format.space_after = Pt(18)
+    for title, page_num in toc_items:
+        r_title = p_toc.add_run(f"{title}")
+        r_title.font.name = 'Times New Roman'
+        r_title.font.size = Pt(11)
+        if "BAB" in title or title in ["HALAMAN JUDUL", "DAFTAR ISI", "DAFTAR PUSTAKA", "LAMPIRAN"]:
+            r_title.font.bold = True
+        dots_len = max(3, 75 - len(title) - len(page_num))
+        r_dots = p_toc.add_run(" " + "." * dots_len + " ")
+        r_dots.font.name = 'Times New Roman'
+        r_dots.font.size = Pt(10)
+        r_dots.font.color.rgb = RGBColor(0x9C, 0xA3, 0xAF)
+        r_num = p_toc.add_run(f"{page_num}\n")
+        r_num.font.name = 'Times New Roman'
+        r_num.font.size = Pt(11)
+        if "BAB" in title or title in ["HALAMAN JUDUL", "DAFTAR ISI"]:
+            r_num.font.bold = True
+
+    doc.add_page_break()
+
+    # ==========================================
+    # BAB I: PENDAHULUAN (Heading 1)
+    # ==========================================
+    add_h1("BAB I", "PENDAHULUAN")
 
     add_h2("1.1 Latar Belakang")
     add_body("Infrastruktur publik, terutama jaringan jalan raya, trotoar pejalan kaki, jembatan, sistem drainase, dan penerangan jalan umum, merupakan urat nadi mobilitas sosial serta roda penggerak perekonomian suatu bangsa. Namun, realitas di lapangan menunjukkan bahwa kerusakan fasilitas fisik sering kali luput dari pemantauan rutin otoritas pemerintah daerah dan dinas terkait hingga timbul korban jiwa atau kemacetan parah. Berdasarkan data Badan Pusat Statistik (BPS) dan Kementerian Pekerjaan Umum dan Perumahan Rakyat (PUPR), puluhan ribu kilometer jalan di berbagai penjuru Indonesia berada dalam kondisi rusak ringan hingga rusak berat. Selain itu, catatan Korlantas Kepolisian Negara Republik Indonesia menegaskan bahwa kondisi jalan yang berlubang, licin, atau bergelombang menjadi salah satu pemicu utama kecelakaan lalu lintas fatal, terutama bagi pengendara roda dua yang mendominasi armada transportasi masyarakat.")
@@ -262,9 +339,9 @@ def create_proposal():
     doc.add_page_break()
 
     # ==========================================
-    # BAB II: PEMBAHASAN DAN PERANCANGAN SISTEM
+    # BAB II: PEMBAHASAN DAN PERANCANGAN SISTEM (Heading 1)
     # ==========================================
-    add_h1("BAB II\nPEMBAHASAN DAN PERANCANGAN SISTEM")
+    add_h1("BAB II", "PEMBAHASAN DAN PERANCANGAN SISTEM")
 
     add_h2("2.1 Penjelasan tentang Website")
     add_body("LaporInfra adalah platform web cerdas yang berfungsi sebagai jembatan digital antara masyarakat sipil dan instansi pengelola infrastruktur pemerintah (Dinas PUPR / Bina Marga / Dinas Perhubungan). Konsep utama LaporInfra berpusat pada integrasi tiga komponen: (1) Antarmuka pelaporan cepat dengan kamera langsung dan sensor GPS, (2) Mesin Multimodal AI yang bertindak sebagai inspektur digital otomatis, dan (3) Peta radar geospasial komprehensif yang menampilkan persebaran anomali infrastruktur.")
@@ -294,12 +371,13 @@ def create_proposal():
 
     add_h2("2.4 Arsitektur Sistem / User Flow")
     add_body("Arsitektur sistem LaporInfra dibangun dengan paradigma Client-Server modern berbasis API RESTful dan Event-driven database. Alur interaksi sistem digambarkan secara komprehensif sebagai berikut:")
-
-    # Architecture explanation
     add_bullet("1. Client Tier (Progressive Web Application): ", "Pengguna mengakses website melalui peramban mobile atau desktop. Pengguna mengaktifkan kamera untuk memotret fisik kerusakan. Secara bersamaan, Browser Geolocation API menangkap koordinat lintang/bujur (Latitude & Longitude) dan sistem melakukan reverse-geocoding ke OpenStreetMap Nominatim untuk memperoleh alamat jalan dan nama kota secara otomatis.")
     add_bullet("2. Processing & AI Vision Tier: ", "Gambar yang diambil dikompresi menjadi format Base64 dan dikirimkan ke endpoint API Gemini 2.5 Flash bersama dengan Structured System Prompt. Model AI menganalisis tekstur aspal, kedalaman retakan/lubang, dan konteks lingkungan, kemudian menghasilkan output berformat JSON terstruktur: kategori kerusakan, tingkat keparahan (Ringan/Sedang/Berat), skor risiko keselamatan (1-10), deskripsi teknis otomatis, dan estimasi rekomendasi perbaikan.")
     add_bullet("3. Data & Storage Tier: ", "Setelah pengguna mengonfirmasi laporan, payload lengkap disimpan ke Firebase Firestore dengan status awal 'Baru'. Sistem membangkitkan nomor tiket unik (misal: RPT-2026-XXXX) untuk pelacakan.")
     add_bullet("4. Geospatial & Dashboard Tier: ", "Laporan baru secara reaktif muncul pada Peta Radar Kerusakan Geospasial dengan marker berwarna sesuai urgensi (Merah = Kritis, Kuning = Sedang, Hijau = Ringan). Tim teknis Dinas PU dapat mengakses Admin Dashboard untuk memverifikasi, menugaskan regu kerja, dan memperbarui status pengerjaan hingga 'Selesai'.")
+
+    # Clean Page Break between 2.4 and 2.5 table
+    doc.add_page_break()
 
     add_h2("2.5 Fitur dan Fungsi")
     add_body("Berikut adalah rincian fitur utama yang tersedia di dalam platform LaporInfra beserta fungsinya:")
@@ -352,7 +430,7 @@ def create_proposal():
                 run.font.name = 'Times New Roman'
                 run.font.size = Pt(10.5)
 
-    add_body("", space_after=4) # spacing
+    add_body("", space_after=6) # spacing
 
     add_h2("2.6 Permasalahan dan Solusi")
     add_h3("2.6.1 Analisis Permasalahan")
@@ -381,9 +459,9 @@ def create_proposal():
     doc.add_page_break()
 
     # ==========================================
-    # BAB III: PENUTUP
+    # BAB III: PENUTUP (Heading 1)
     # ==========================================
-    add_h1("BAB III\nPENUTUP")
+    add_h1("BAB III", "PENUTUP")
     add_body("LaporInfra hadir sebagai manifestasi nyata dari tema Infinitera 2.0: “Bridging Innovation and Sustainability to Create Meaningful Impact for Future Generations”. Melalui perpaduan kecerdasan buatan Multimodal Vision AI Google Gemini dan sistem informasi geospasial real-time, LaporInfra membuktikan bahwa teknologi masa depan dapat didekatkan secara inklusif dan humanis untuk menyelesaikan permasalahan mendasar masyarakat.")
     add_body("Platform ini berhasil mentransformasikan paradigma pelaporan fasilitas publik dari yang semula lambat, rumit, dan berbelit-belit menjadi pengalaman digital yang cepat, akurat, dan transparan. Dukungan terhadap pencapaian target SDG 9 (Infrastruktur dan Inovasi) serta SDG 11 (Kota Berkelanjutan) menegaskan komitmen tim kami dalam membangun fondasi kota yang lebih aman dan tangguh bagi generasi mendatang.")
     add_body("Tim nama timnya apa pin dari SMK Telkom Banjarbaru berharap LaporInfra tidak hanya menjadi karya kompetisi semata, tetapi dapat diimplementasikan secara konkret dan berkolaborasi dengan pemerintah daerah di seluruh Indonesia. Dengan partisipasi aktif warga dan ketepatan respons berbasis data pintar, kita bersama-sama dapat mewujudkan infrastruktur negeri yang kokoh, berkeadilan, dan berkelanjutan.")
@@ -391,45 +469,101 @@ def create_proposal():
     doc.add_page_break()
 
     # ==========================================
-    # DAFTAR PUSTAKA
+    # DAFTAR PUSTAKA (Heading 1) - With Proper APA 7th Italic & Hanging Indent
     # ==========================================
     add_h1("DAFTAR PUSTAKA")
     
-    references = [
-        "Badan Pusat Statistik. (2024). Statistik Transportasi Darat dan Kondisi Jalan Indonesia 2023. Jakarta: BPS RI.",
-        "Google Cloud. (2025). Gemini 2.5 Flash Multimodal Vision API Documentation and Technical Report. Mountain View: Google LLC.",
-        "Kementerian Pekerjaan Umum dan Perumahan Rakyat. (2023). Standar Penilaian Kerusakan Jalan dan Pemeliharaan Rutin Bina Marga (No. 04/SE/Db/2023). Jakarta: Direktorat Jenderal Bina Marga.",
-        "Korlantas Polri. (2024). Laporan Tahunan Data Kecelakaan Lalu Lintas Nasional Akibat Kerusakan Fisik Prasarana Jalan. Jakarta: Korps Lalu Lintas Kepolisian Negara Republik Indonesia.",
-        "Leaflet. (2024). Leaflet: An Open-Source JavaScript Library for Mobile-Friendly Interactive Maps. Diakses dari https://leafletjs.com/.",
-        "OpenStreetMap Foundation. (2024). OpenStreetMap Collaborative Geospatial Database and Nominatim Reverse Geocoding. Diakses dari https://www.openstreetmap.org/.",
-        "React Documentation Team. (2025). React 19: The Library for Web and Native User Interfaces. Diakses dari https://react.dev/.",
-        "United Nations. (2015). Transforming Our World: The 2030 Agenda for Sustainable Development (SDG 9: Industry, Innovation, and Infrastructure; SDG 11: Sustainable Cities and Communities). New York: United Nations Department of Economic and Social Affairs.",
-        "World Health Organization. (2023). Global Status Report on Road Safety 2023. Geneva: World Health Organization."
+    apa_references = [
+        {
+            "author": "Badan Pusat Statistik.",
+            "year": "(2024).",
+            "title": "Statistik Transportasi Darat dan Kondisi Jalan Indonesia 2023.",
+            "publisher": "Jakarta: BPS RI."
+        },
+        {
+            "author": "Google Cloud.",
+            "year": "(2025).",
+            "title": "Gemini 2.5 Flash Multimodal Vision API Documentation and Technical Report.",
+            "publisher": "Mountain View: Google LLC."
+        },
+        {
+            "author": "Kementerian Pekerjaan Umum dan Perumahan Rakyat.",
+            "year": "(2023).",
+            "title": "Standar Penilaian Kerusakan Jalan dan Pemeliharaan Rutin Bina Marga (No. 04/SE/Db/2023).",
+            "publisher": "Jakarta: Direktorat Jenderal Bina Marga."
+        },
+        {
+            "author": "Korlantas Polri.",
+            "year": "(2024).",
+            "title": "Laporan Tahunan Data Kecelakaan Lalu Lintas Nasional Akibat Kerusakan Fisik Prasarana Jalan.",
+            "publisher": "Jakarta: Korps Lalu Lintas Kepolisian Negara Republik Indonesia."
+        },
+        {
+            "author": "Leaflet.",
+            "year": "(2024).",
+            "title": "Leaflet: An Open-Source JavaScript Library for Mobile-Friendly Interactive Maps.",
+            "publisher": "Diakses dari https://leafletjs.com/."
+        },
+        {
+            "author": "OpenStreetMap Foundation.",
+            "year": "(2024).",
+            "title": "OpenStreetMap Collaborative Geospatial Database and Nominatim Reverse Geocoding.",
+            "publisher": "Diakses dari https://www.openstreetmap.org/."
+        },
+        {
+            "author": "React Documentation Team.",
+            "year": "(2025).",
+            "title": "React 19: The Library for Web and Native User Interfaces.",
+            "publisher": "Diakses dari https://react.dev/."
+        },
+        {
+            "author": "United Nations.",
+            "year": "(2015).",
+            "title": "Transforming Our World: The 2030 Agenda for Sustainable Development (SDG 9: Industry, Innovation, and Infrastructure; SDG 11: Sustainable Cities and Communities).",
+            "publisher": "New York: United Nations Department of Economic and Social Affairs."
+        },
+        {
+            "author": "World Health Organization.",
+            "year": "(2023).",
+            "title": "Global Status Report on Road Safety 2023.",
+            "publisher": "Geneva: World Health Organization."
+        }
     ]
 
-    p_ref = doc.add_paragraph()
-    p_ref.paragraph_format.line_spacing = 1.25
-    p_ref.paragraph_format.space_after = Pt(8)
-    for ref in references:
+    for ref in apa_references:
         p_item = doc.add_paragraph()
         p_item.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p_item.paragraph_format.left_indent = Inches(0.5)
         p_item.paragraph_format.first_line_indent = Inches(-0.5)
+        p_item.paragraph_format.space_before = Pt(0)
+        p_item.paragraph_format.space_after = Pt(7)
         p_item.paragraph_format.line_spacing = 1.15
-        p_item.paragraph_format.space_after = Pt(6)
-        r = p_item.add_run(ref)
-        r.font.name = 'Times New Roman'
-        r.font.size = Pt(11)
+        
+        r_auth = p_item.add_run(f"{ref['author']} {ref['year']} ")
+        r_auth.font.name = 'Times New Roman'
+        r_auth.font.size = Pt(11)
+        r_auth.font.color.rgb = RGBColor(0x1F, 0x24, 0x21)
+
+        r_title = p_item.add_run(f"{ref['title']} ")
+        r_title.font.name = 'Times New Roman'
+        r_title.font.size = Pt(11)
+        r_title.font.italic = True # Academic APA Italic
+        r_title.font.color.rgb = RGBColor(0x1F, 0x24, 0x21)
+
+        r_pub = p_item.add_run(f"{ref['publisher']}")
+        r_pub.font.name = 'Times New Roman'
+        r_pub.font.size = Pt(11)
+        r_pub.font.color.rgb = RGBColor(0x1F, 0x24, 0x21)
 
     doc.add_page_break()
 
     # ==========================================
-    # LAMPIRAN
+    # LAMPIRAN (Heading 1)
     # ==========================================
     add_h1("LAMPIRAN")
     add_body("Lampiran ini menyajikan dokumentasi antarmuka pengguna (User Interface) utama dari website LaporInfra, tautan repositori kode sumber, tautan aplikasi yang telah ter-deploy secara live, serta tautan video demonstrasi produk.")
 
-    # Links table
+    # Links
     p_links = doc.add_paragraph()
     p_links.paragraph_format.line_spacing = 1.3
     p_links.paragraph_format.space_before = Pt(8)
@@ -448,7 +582,7 @@ def create_proposal():
             r_lbl.font.bold = True
             r_lbl.font.color.rgb = RGBColor(0x1D, 0x4E, 0xD8)
 
-    # Screenshots if available
+    # Screenshots
     s1 = r"C:\Users\ryanf\OneDrive\Gambar\Screenshots\Screenshot 2026-09-19 161631.png"
     s2 = r"C:\Users\ryanf\OneDrive\Gambar\Screenshots\Screenshot 2026-09-19 162011.png"
 
@@ -481,8 +615,22 @@ def create_proposal():
         p_s2.add_run().add_picture(s2, width=Inches(5.6))
 
     output_path = r"C:\Users\ryanf\Downloads\PROPOSAL_INFINITERA_2.0_LaporInfra.docx"
-    doc.save(output_path)
-    print(f"SUCCESS: Proposal saved to {output_path}")
+    rev_path = r"C:\Users\ryanf\Downloads\PROPOSAL_INFINITERA_2.0_LaporInfra_Revisi.docx"
+    local_path = r"C:\Users\ryanf\OneDrive\Documents\LaporInfra\PROPOSAL_INFINITERA_2.0_LaporInfra.docx"
+    
+    saved_paths = []
+    for path in [output_path, rev_path, local_path]:
+        try:
+            doc.save(path)
+            saved_paths.append(path)
+            print(f"SUCCESS: Saved to {path}")
+        except PermissionError:
+            print(f"NOTE: {path} is currently open in Word. Skipped overwriting it.")
+    
+    if not saved_paths:
+        alt = r"C:\Users\ryanf\Downloads\PROPOSAL_LaporInfra_Final.docx"
+        doc.save(alt)
+        print(f"SUCCESS: Saved to {alt}")
 
 if __name__ == '__main__':
     create_proposal()
