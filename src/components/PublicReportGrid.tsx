@@ -72,6 +72,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
       const q = searchQuery.toLowerCase().trim();
       list = list.filter(
         (r) =>
+          (r.title && r.title.toLowerCase().includes(q)) ||
           r.kategori.toLowerCase().includes(q) ||
           (r.deskripsi_otomatis && r.deskripsi_otomatis.toLowerCase().includes(q)) ||
           (r.deskripsi_manual && r.deskripsi_manual.toLowerCase().includes(q)) ||
@@ -375,8 +376,13 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                         </div>
                       </div>
 
+                      {/* Report Title */}
+                      <h3 className="text-sm font-bold text-stone-900 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                        {report.title || report.kategori}
+                      </h3>
+
                       {/* AI Description summary */}
-                      <p className="text-xs font-medium text-stone-800 line-clamp-2 leading-relaxed">
+                      <p className="text-xs font-normal text-stone-600 line-clamp-2 leading-relaxed">
                         {report.deskripsi_otomatis}
                       </p>
 

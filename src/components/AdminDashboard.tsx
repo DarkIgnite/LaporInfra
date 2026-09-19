@@ -107,6 +107,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const q = searchQuery.toLowerCase();
       list = list.filter(
         (r) =>
+          (r.title && r.title.toLowerCase().includes(q)) ||
           r.ticketNumber.toLowerCase().includes(q) ||
           r.kategori.toLowerCase().includes(q) ||
           r.deskripsi_otomatis.toLowerCase().includes(q) ||
@@ -161,6 +162,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleExportCSV = () => {
     const headers = [
       'Nomor Tiket',
+      'Judul Laporan',
       'Kategori',
       'Tingkat Keparahan',
       'Status',
@@ -175,6 +177,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     const rows = reports.map((r) => [
       r.ticketNumber,
+      `"${(r.title || r.kategori).replace(/"/g, '""')}"`,
       `"${r.kategori}"`,
       r.tingkat_keparahan,
       r.status,
@@ -490,15 +493,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <img
                               src={report.imageUrl}
                               alt={report.kategori}
-                              className="h-10 w-10 rounded-xl object-cover bg-stone-900 shrink-0 border border-stone-200"
+                              className="h-10 w-10 rounded-xl object-cover bg-stone-100 shrink-0 border border-stone-200"
                               referrerPolicy="no-referrer"
                             />
                             <div>
-                              <span className="font-bold text-stone-900 block">
-                                {report.kategori}
+                              <span className="font-bold text-stone-900 block truncate max-w-[220px]" title={report.title || report.kategori}>
+                                {report.title || report.kategori}
                               </span>
-                              <span className="text-[10px] text-stone-400">
-                                Pelapor: {report.reporterName || 'Warga'}
+                              <span className="text-[10px] text-stone-500">
+                                {report.title ? `${report.kategori} • ` : ''}Pelapor: {report.reporterName || 'Warga'}
                               </span>
                             </div>
                           </div>
@@ -581,7 +584,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   Ubah Status Penanganan Dinas
                 </h4>
                 <p className="text-xs text-gray-500 font-mono">
-                  {editingReport.ticketNumber} — {editingReport.kategori}
+                  {editingReport.ticketNumber} — {editingReport.title || editingReport.kategori}
                 </p>
               </div>
               <button

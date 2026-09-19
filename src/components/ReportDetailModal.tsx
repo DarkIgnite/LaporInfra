@@ -309,10 +309,10 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                   className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all shadow-xs ${
                     upvoted
                       ? 'bg-emerald-600 text-white cursor-default'
-                      : 'bg-stone-900 text-white hover:bg-stone-800 active:scale-95'
+                      : 'bg-amber-500 text-white hover:bg-amber-600 active:scale-95'
                   }`}
                 >
-                  <ThumbsUp className="h-3.5 w-3.5 text-amber-400" />
+                  <ThumbsUp className="h-3.5 w-3.5 text-white" />
                   <span>{upvoted ? 'Didukung' : 'Dukung'}</span>
                 </button>
               </div>
@@ -416,13 +416,20 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               {/* Category & AI Vision Summary */}
               <div className="rounded-3xl border border-stone-200/80 bg-linear-to-br from-amber-50/40 via-white to-stone-50 p-6 space-y-4 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-3.5 py-1 text-xs font-bold text-white shadow-xs">
-                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1 text-xs font-bold text-white shadow-xs">
+                    <Sparkles className="h-3.5 w-3.5 text-white" />
                     <span>Klasifikasi AI Gemini</span>
                   </span>
-                  <span className="text-xs font-bold text-stone-700">
-                    Kategori: {activeReport.kategori}
+                  <span className="text-xs font-bold text-stone-700 bg-white border border-stone-200 px-3 py-1 rounded-full">
+                    {activeReport.kategori}
                   </span>
+                </div>
+
+                {/* Report Title */}
+                <div>
+                  <h3 className="text-xl font-black text-stone-900 leading-snug">
+                    {activeReport.title || activeReport.kategori}
+                  </h3>
                 </div>
 
                 <div className="space-y-1.5">

@@ -221,7 +221,7 @@ const RecentCard: React.FC<{ report: InfrastructureReport; onClick: () => void }
             {report.status}
           </span>
         </div>
-        <p className="text-sm font-semibold text-gray-800 truncate leading-tight">{report.kategori}</p>
+        <p className="text-sm font-semibold text-gray-800 truncate leading-tight">{report.title || report.kategori}</p>
         <p className="text-xs text-gray-500 truncate mt-0.5 flex items-center gap-1">
           <MapPin className="h-3 w-3 shrink-0" />
           {report.location.city || report.location.address}
@@ -474,8 +474,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         referrerPolicy="no-referrer"
                       />
                       <div className="text-[10px] leading-tight">
-                        <p className="font-bold text-gray-800 truncate max-w-[90px]">{r.kategori}</p>
-                        <p className="text-gray-400 truncate max-w-[90px]">{r.location.city || 'Indonesia'}</p>
+                        <p className="font-bold text-gray-800 truncate max-w-[120px]">{r.title || r.kategori}</p>
+                        <p className="text-gray-400 truncate max-w-[120px]">{r.location.city || 'Indonesia'}</p>
                       </div>
                     </button>
                   ))}

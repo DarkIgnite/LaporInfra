@@ -233,6 +233,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
 
   const [selectedCategory, setSelectedCategory] = useState<DamageCategory>('Jalan Berlubang');
   const [selectedSeverity, setSelectedSeverity] = useState<SeverityLevel>('Sedang');
+  const [title, setTitle] = useState<string>('');
   const [autoDescription, setAutoDescription] = useState<string>('');
   const [manualDescription, setManualDescription] = useState<string>('');
   const [priorityRecommendation, setPriorityRecommendation] = useState<string>('');
@@ -331,6 +332,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
         setStep('initial');
         setPhotoBase64(null);
         setAiResult(null);
+        setTitle('');
         setManualDescription('');
         setReporterName('');
         setAnalysisError(null);
@@ -369,6 +371,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
       setSelectedSeverity(result.tingkat_keparahan);
       setAutoDescription(result.deskripsi_otomatis);
       setPriorityRecommendation(result.rekomendasi_prioritas);
+      setTitle((prev) => (prev.trim() ? prev : `${result.kategori} di ${location.city || 'Jalan Umum'}`));
       if (!result.is_valid_infrastructure) setIsInvalidInfraWarning(true);
       setStep('review');
     } catch (err: any) {
@@ -377,6 +380,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
       setSelectedSeverity('Sedang');
       setAutoDescription('Laporan kerusakan fasilitas publik.');
       setPriorityRecommendation('Menunggu pemeriksaan lapangan.');
+      setTitle((prev) => (prev.trim() ? prev : `Kerusakan Fasilitas di ${location.city || 'Jalan Umum'}`));
       setStep('review');
     }
   };
@@ -386,7 +390,9 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
     if (!photoBase64) { alert('Foto kerusakan wajib diambil.'); return; }
     setIsSubmitting(true);
     try {
+      const finalTitle = title.trim() || selectedCategory;
       const report = await createReport({
+        title: finalTitle,
         imageUrl: photoBase64,
         kategori: selectedCategory,
         tingkat_keparahan: selectedSeverity,
@@ -634,6 +640,22 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                   </div>
                   <p className="text-xs text-gray-700 leading-snug line-clamp-3">{autoDescription || 'Kerusakan terdeteksi'}</p>
                 </div>
+              </div>
+
+              {/* Judul Laporan */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center justify-between">
+                  <span>Judul Laporan</span>
+                  <span className="text-[10px] text-amber-600 font-normal">Wajib diisi</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Contoh: Lubang Aspal Ambles di Lajur Kanan..."
+                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none"
+                />
               </div>
 
               {/* Category & Severity */}

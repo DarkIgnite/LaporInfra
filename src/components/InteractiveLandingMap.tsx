@@ -269,16 +269,16 @@ export const InteractiveLandingMap: React.FC<InteractiveLandingMapProps> = ({
       const markerHtml = `
         <div class="cursor-pointer transition-all duration-300 ${isSelected ? 'scale-115 z-50' : 'hover:scale-110'}" style="transform: translate(-50%, -100%);">
           <div class="relative flex items-center gap-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-1.5 border-2 ${
-            isSelected ? 'border-amber-500 ring-4 ring-amber-500/30' : 'border-stone-800/80 hover:border-amber-500'
+            isSelected ? 'border-amber-500 ring-4 ring-amber-500/30' : 'border-stone-200 hover:border-amber-500'
           }">
-            <div class="relative w-8 h-8 rounded-xl overflow-hidden shrink-0 bg-stone-900">
+            <div class="relative w-8 h-8 rounded-xl overflow-hidden shrink-0 bg-stone-100">
               <img src="${report.imageUrl}" alt="${report.kategori}" class="w-full h-full object-cover" crossOrigin="anonymous" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <span class="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full ${sev.dot} ring-1 ring-white"></span>
             </div>
             <div class="pr-2 min-w-0">
               <div class="flex items-center gap-1">
-                <span class="text-[10px] font-black tracking-tight text-stone-900 truncate max-w-[110px]">${report.kategori}</span>
+                <span class="text-[10px] font-black tracking-tight text-stone-900 truncate max-w-[120px]">${report.title || report.kategori}</span>
               </div>
               <div class="flex items-center gap-1 text-[9px] font-bold ${
                 report.tingkat_keparahan === 'Berat' ? 'text-rose-600' : 'text-amber-600'

@@ -41,6 +41,7 @@ export interface StatusUpdateHistory {
 export interface InfrastructureReport {
   id: string;
   ticketNumber: string;
+  title?: string;
   imageUrl: string;
   thumbnailUrl?: string;
   location: LocationCoords;

@@ -4,6 +4,7 @@ export const SEED_REPORTS: InfrastructureReport[] = [
   {
     id: 'rep-001',
     ticketNumber: 'INFRA-2026-0801',
+    title: 'Lubang Aspal Ambles di Lajur Cepat Rasuna Said',
     imageUrl: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&q=80',
     location: {
       lat: -6.2088,
@@ -40,6 +41,7 @@ export const SEED_REPORTS: InfrastructureReport[] = [
   {
     id: 'rep-002',
     ticketNumber: 'INFRA-2026-0802',
+    title: 'Retakan Struktural Abutment Jembatan Cikapundung',
     imageUrl: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=1200&q=80',
     location: {
       lat: -6.9175,
@@ -69,6 +71,7 @@ export const SEED_REPORTS: InfrastructureReport[] = [
   {
     id: 'rep-003',
     ticketNumber: 'INFRA-2026-0803',
+    title: 'Paving Guiding Block Trotoar Ambles Dekat Stasiun',
     imageUrl: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=1200&q=80',
     location: {
       lat: -7.2575,
@@ -105,6 +108,7 @@ export const SEED_REPORTS: InfrastructureReport[] = [
   {
     id: 'rep-004',
     ticketNumber: 'INFRA-2026-0804',
+    title: '3 Tiang Lampu PJU Padam Berurutan di Malioboro',
     imageUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80',
     location: {
       lat: -7.7956,
@@ -147,6 +151,7 @@ export const SEED_REPORTS: InfrastructureReport[] = [
   {
     id: 'rep-005',
     ticketNumber: 'INFRA-2026-0805',
+    title: 'Saluran Drainase Primer Tersumbat Lumpur & Sampah',
     imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
     location: {
       lat: -6.1754,
@@ -176,6 +181,7 @@ export const SEED_REPORTS: InfrastructureReport[] = [
   {
     id: 'rep-006',
     ticketNumber: 'INFRA-2026-0806',
+    title: 'Retak Buaya Pada Bahu Jalan Gatot Subroto',
     imageUrl: 'https://images.unsplash.com/photo-1588694926280-3ae414d06ccb?auto=format&fit=crop&w=1200&q=80',
     location: {
       lat: 3.5952,

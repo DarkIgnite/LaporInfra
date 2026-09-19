@@ -161,7 +161,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full ${sev.dot} shrink-0"></span>
-                <span class="text-[10px] font-bold text-slate-800 truncate">${report.kategori}</span>
+                <span class="text-[10px] font-bold text-slate-800 truncate">${report.title || report.kategori}</span>
               </div>
               <div class="text-[9px] text-slate-500 font-medium truncate">${report.location.address?.split(',')[0] || 'Lokasi'}</div>
             </div>
@@ -231,11 +231,11 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
           title="Pusatkan ke Lokasi Saya (GPS)"
           className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm border transition-all active:scale-95 ${
             isLocating
-              ? 'border-blue-500 text-blue-600 bg-blue-50/90 ring-2 ring-blue-400/30'
-              : 'border-slate-200/80 text-slate-700 hover:bg-slate-50 hover:text-blue-600'
+              ? 'border-amber-500 text-amber-600 bg-amber-50/90 ring-2 ring-amber-400/30'
+              : 'border-slate-200/80 text-slate-700 hover:bg-amber-50/50 hover:text-amber-600'
           }`}
         >
-          <Crosshair className={`h-4 w-4 ${isLocating ? 'animate-spin text-blue-600' : ''}`} />
+          <Crosshair className={`h-4 w-4 ${isLocating ? 'animate-spin text-amber-600' : ''}`} />
         </button>
 
         {/* Zoom Controls */}
@@ -263,8 +263,8 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
       {userLocation && (
         <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold text-slate-700">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
           </span>
           <span className="max-w-[200px] truncate text-[11px] font-medium text-slate-600">
             {userLocation.address || 'Pusat Area Pantauan'}
