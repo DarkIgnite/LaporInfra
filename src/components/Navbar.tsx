@@ -124,21 +124,24 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Center: Navigation Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                id={`nav-tab-${item.id}`}
-                onClick={() => onNavigate(item.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                  activeTab === item.id
-                    ? 'bg-amber-500 text-white shadow-xs'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  id={`nav-tab-${item.id}`}
+                  onClick={() => onNavigate(item.id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                    isActive
+                      ? 'nav-tab-active font-bold'
+                      : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100/70 dark:hover:bg-white/5'
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </nav>
 
           {/* Right: Actions */}

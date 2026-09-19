@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Apple Design System Foundations */
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -531,6 +533,18 @@ html.dark .google-incident-marker .text-slate-500,
 html.dark .google-incident-marker .text-slate-600 {
   color: #fcd34d !important;
 }
+
+/* Sleek Navbar Active Tab (Subtle & Elegant) */
+.nav-tab-active {
+  background-color: #fef3c7 !important;
+  color: #b45309 !important;
+}
+
+html.dark .nav-tab-active {
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  color: #fbbf24 !important;
+}
+
 
 
 
