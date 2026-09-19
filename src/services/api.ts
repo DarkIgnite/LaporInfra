@@ -6,6 +6,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   orderBy,
   onSnapshot,
@@ -388,6 +389,83 @@ export async function upvoteReport(id: string): Promise<number> {
   }
 
   return newVoteCount;
+}
+
+// Super Admin: Update full report (title/category, photos, description, severity, status, location)
+export async function updateFullReport(
+  id: string,
+  updates: Partial<InfrastructureReport>
+): Promise<InfrastructureReport | null> {
+  const now = new Date().toISOString();
+  const list = getLocalCache();
+  const index = list.findIndex((r) => r.id === id || r.ticketNumber === id);
+  let updatedReport: InfrastructureReport | null = null;
+
+  if (index !== -1) {
+    const existing = list[index];
+    updatedReport = {
+      ...existing,
+      ...updates,
+      id: existing.id,
+      ticketNumber: existing.ticketNumber,
+      updatedAt: now,
+    };
+    list[index] = updatedReport;
+    saveLocalCache(list);
+  }
+
+  // 1. Sync to Express Backend
+  try {
+    const res = await fetch(`/api/reports/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.report) {
+        updatedReport = data.report;
+      }
+    }
+  } catch (e) {
+    console.warn('Express API updateFullReport error:', e);
+  }
+
+  // 2. Sync to Firestore
+  try {
+    if (updatedReport) {
+      const docRef = doc(db, REPORTS_COLLECTION, id);
+      await setDoc(docRef, updatedReport, { merge: true });
+    }
+  } catch (e) {
+    console.warn('Firestore updateFullReport error:', e);
+  }
+
+  return updatedReport;
+}
+
+// Super Admin: Delete report
+export async function deleteReport(id: string): Promise<boolean> {
+  const list = getLocalCache();
+  const filtered = list.filter((r) => r.id !== id && r.ticketNumber !== id);
+  saveLocalCache(filtered);
+
+  // 1. Delete on Express backend
+  try {
+    await fetch(`/api/reports/${id}`, { method: 'DELETE' });
+  } catch (e) {
+    console.warn('Express API delete error:', e);
+  }
+
+  // 2. Delete on Firestore
+  try {
+    const docRef = doc(db, REPORTS_COLLECTION, id);
+    await deleteDoc(docRef);
+  } catch (e) {
+    console.warn('Firestore delete error:', e);
+  }
+
+  return true;
 }
 
 // Fetch Admin Stats

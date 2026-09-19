@@ -17,11 +17,14 @@ import {
   Calendar,
   Layers,
   Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  Crown
 } from 'lucide-react';
 import { InfrastructureReport, AdminUser, ReportStatus, DamageCategory, SeverityLevel } from '../types';
 import { getSeverityStyle, getStatusStyle, formatIndonesianDate } from '../utils/helpers';
 import { updateReportStatus, resetReportsToSeed } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { SuperAdminEditModal } from './SuperAdminEditModal';
 
 interface AdminDashboardProps {
   reports: InfrastructureReport[];
@@ -36,11 +39,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSelectReport,
   onReportsUpdated,
 }) => {
+  const { userProfile } = useAuth();
+  const isSuperAdmin = userProfile?.role === 'super_admin';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('Semua');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [severityFilter, setSeverityFilter] = useState('Semua');
   const [sortBy, setSortBy] = useState<'keparahan' | 'terbaru' | 'terlama'>('keparahan');
+
+  // Super Admin Edit Modal State
+  const [superAdminEditingReport, setSuperAdminEditingReport] = useState<InfrastructureReport | null>(null);
 
   // Quick Status Edit Modal State
   const [editingReport, setEditingReport] = useState<InfrastructureReport | null>(null);
@@ -184,15 +193,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-stone-800">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md shadow-amber-500/20">
-                <Building2 className="h-5 w-5 stroke-[2.2]" />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${isSuperAdmin ? 'bg-gradient-to-tr from-amber-500 to-orange-500' : 'bg-blue-600'} text-white shadow-md`}>
+                {isSuperAdmin ? <Crown className="h-5 w-5 text-white" /> : <Building2 className="h-5 w-5 stroke-[2.2]" />}
               </div>
               <h1 className="text-xl sm:text-2xl font-black tracking-tight">
-                Dashboard Dinas Pekerjaan Umum &amp; Tata Ruang
+                {isSuperAdmin ? 'Dashboard Pengendali Super Admin' : 'Dashboard Dinas Pekerjaan Umum & Tata Ruang'}
               </h1>
             </div>
             <p className="text-xs sm:text-sm text-stone-300">
-              Pengelola: <span className="font-bold text-amber-400">{adminUser.name}</span> &bull; {adminUser.department} ({adminUser.role})
+              Pengelola: <span className="font-bold text-amber-400">{userProfile?.displayName || adminUser.name}</span> &bull; {isSuperAdmin ? 'Kementerian PUPR / Super Administrator' : `${adminUser.department} (${adminUser.role})`}
             </p>
           </div>
 
@@ -560,6 +569,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <Edit3 className="h-3.5 w-3.5 text-amber-400" />
                             <span>Ubah Status</span>
                           </button>
+                          {isSuperAdmin && (
+                            <button
+                              onClick={() => setSuperAdminEditingReport(report)}
+                              title="Super Admin: Edit Judul, Foto, Kategori & Hapus"
+                              className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow-xs active:scale-95"
+                            >
+                              <Crown className="h-3.5 w-3.5 text-amber-100" />
+                              <span>Edit Penuh</span>
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -647,6 +666,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Super Admin Edit Modal */}
+      {isSuperAdmin && superAdminEditingReport && (
+        <SuperAdminEditModal
+          report={superAdminEditingReport}
+          isOpen={!!superAdminEditingReport}
+          onClose={() => setSuperAdminEditingReport(null)}
+          onSaved={() => {
+            setSuperAdminEditingReport(null);
+            onReportsUpdated();
+          }}
+          onDeleted={() => {
+            setSuperAdminEditingReport(null);
+            onReportsUpdated();
+          }}
+        />
       )}
     </div>
   );

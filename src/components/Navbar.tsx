@@ -13,7 +13,8 @@ import {
   Home,
   Map,
   LayoutGrid,
-  Bell
+  Bell,
+  Crown
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
@@ -39,6 +40,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isPetugas = userProfile?.role === 'petugas';
+  const isSuperAdmin = userProfile?.role === 'super_admin';
+  const canAccessAdmin = isPetugas || isSuperAdmin;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -62,12 +65,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleRoleChange = async (role: UserRole) => {
-    await setUserRole(
-      role,
-      role === 'petugas' ? 'Dinas Pekerjaan Umum & Tata Kota' : 'Masyarakat Umum',
-      role === 'petugas' ? 'Petugas Dinas' : 'Warga Terverifikasi'
-    );
+    let agency = 'Masyarakat Umum';
+    let rank = 'Warga Terverifikasi';
     if (role === 'petugas') {
+      agency = 'Dinas Pekerjaan Umum & Tata Kota';
+      rank = 'Petugas Dinas';
+    } else if (role === 'super_admin') {
+      agency = 'Kementerian PUPR / Pusat Pengendali';
+      rank = 'Super Administrator';
+    }
+    await setUserRole(role, agency, rank);
+    if (role === 'petugas' || role === 'super_admin') {
       onNavigate('admin');
     }
   };
@@ -80,8 +88,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'beranda', label: 'Beranda' },
     { id: 'laporan', label: 'Laporan Publik' },
     { id: 'peta', label: 'Peta Radar' },
-    { id: 'asisten', label: 'Tanya AI', icon: <Sparkles className="h-3.5 w-3.5 text-amber-500" /> },
-    ...(isPetugas ? [{ id: 'admin' as const, label: 'Dashboard PU', icon: <Building2 className="h-3.5 w-3.5 text-amber-600" /> }] : [])
+    { id: 'asisten', label: 'Tanya AI', icon: <Sparkles className="h-3.5 w-3.5 text-blue-600" /> },
+    ...(canAccessAdmin
+      ? [{
+          id: 'admin' as const,
+          label: isSuperAdmin ? 'Super Admin' : 'Dashboard PU',
+          icon: isSuperAdmin ? <Crown className="h-3.5 w-3.5 text-amber-500" /> : <Building2 className="h-3.5 w-3.5 text-amber-600" />
+        }]
+      : [])
   ];
 
   return (
@@ -176,18 +190,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="text-sm font-semibold text-gray-800 max-w-[80px] truncate">
                       {user.displayName?.split(' ')[0] || 'Akun'}
                     </span>
-                    {isPetugas && (
-                      <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
+                    {isSuperAdmin ? (
+                      <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                        <Crown className="h-2.5 w-2.5 text-amber-600" />
+                        Admin
+                      </span>
+                    ) : isPetugas ? (
+                      <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
                         Petugas
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
                 </button>
 
                 {/* Dropdown */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-72 rounded-xl bg-white shadow-xl border border-gray-200 z-50 overflow-hidden animate-apple-dialog">
+                  <div className="absolute right-0 top-full mt-2 w-80 rounded-xl bg-white shadow-xl border border-gray-200 z-50 overflow-hidden animate-apple-dialog">
 
                     {/* User Header */}
                     <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 bg-gray-50">
@@ -204,55 +223,77 @@ export const Navbar: React.FC<NavbarProps> = ({
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-gray-900 truncate">
-                          {user.displayName || 'Pengguna LaporInfra'}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-bold text-gray-900 truncate">
+                            {user.displayName || 'Pengguna LaporInfra'}
+                          </p>
+                          {isSuperAdmin && (
+                            <span className="shrink-0 inline-flex items-center gap-0.5 text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 rounded px-1 py-0.2">
+                              <Crown className="h-2.5 w-2.5 text-amber-600" />
+                              SUPER
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                       </div>
                     </div>
 
                     {/* Role Selector */}
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-xs font-semibold text-gray-500 mb-2">Peran Akun</p>
-                      <div className="grid grid-cols-2 gap-2">
+                      <p className="text-xs font-semibold text-gray-500 mb-2">Pilih Peran Akun</p>
+                      <div className="grid grid-cols-3 gap-1.5">
                         <button
                           type="button"
                           onClick={() => handleRoleChange('warga')}
-                          className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all border ${
-                            !isPetugas
-                              ? 'bg-blue-600 text-white border-blue-600'
+                          className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-lg text-[11px] font-semibold transition-all border ${
+                            userProfile?.role === 'warga' || (!userProfile?.role && !isPetugas && !isSuperAdmin)
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                               : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                           }`}
                         >
                           <User className="h-3.5 w-3.5" />
-                          Warga
-                          {!isPetugas && <Check className="h-3 w-3" />}
+                          <span>Warga</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRoleChange('petugas')}
-                          className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all border ${
-                            isPetugas
-                              ? 'bg-amber-500 text-white border-amber-500'
-                              : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50'
+                          className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-lg text-[11px] font-semibold transition-all border ${
+                            userProfile?.role === 'petugas'
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                           }`}
                         >
                           <Building2 className="h-3.5 w-3.5" />
-                          Petugas PU
-                          {isPetugas && <Check className="h-3 w-3" />}
+                          <span>Petugas PU</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRoleChange('super_admin')}
+                          className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-lg text-[11px] font-bold transition-all border ${
+                            userProfile?.role === 'super_admin'
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white border-amber-500 shadow-xs'
+                              : 'bg-amber-50/70 text-amber-800 border-amber-200 hover:bg-amber-100'
+                          }`}
+                        >
+                          <Crown className="h-3.5 w-3.5 text-amber-500 group-hover:text-amber-600" />
+                          <span>Super Admin</span>
                         </button>
                       </div>
                     </div>
 
                     {/* Actions */}
                     <div className="py-2">
-                      {isPetugas && (
+                      {canAccessAdmin && (
                         <button
                           onClick={() => { setIsDropdownOpen(false); onNavigate('admin'); }}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                          <Building2 className="h-4 w-4 text-amber-600" />
-                          Buka Dashboard Dinas PU
+                          {isSuperAdmin ? (
+                            <Crown className="h-4 w-4 text-amber-600" />
+                          ) : (
+                            <Building2 className="h-4 w-4 text-amber-600" />
+                          )}
+                          <span>{isSuperAdmin ? 'Dashboard Super Admin' : 'Dashboard Dinas PU'}</span>
                         </button>
                       )}
                       <button
@@ -332,15 +373,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         {/* AI / Admin */}
-        {isPetugas ? (
+        {canAccessAdmin ? (
           <button
             onClick={() => onNavigate('admin')}
             className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] py-1 px-2 rounded-xl text-[10px] font-semibold transition-all relative ${
               activeTab === 'admin' ? 'text-blue-600' : 'text-gray-400'
             }`}
           >
-            <LayoutGrid className={`h-5 w-5 ${activeTab === 'admin' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
-            <span className="mt-0.5">Dinas PU</span>
+            {isSuperAdmin ? (
+              <Crown className={`h-5 w-5 ${activeTab === 'admin' ? 'stroke-[2.5] text-amber-600' : 'stroke-[1.5]'}`} />
+            ) : (
+              <LayoutGrid className={`h-5 w-5 ${activeTab === 'admin' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
+            )}
+            <span className="mt-0.5">{isSuperAdmin ? 'Admin' : 'Dinas PU'}</span>
             {activeTab === 'admin' && (
               <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-blue-600" />
             )}

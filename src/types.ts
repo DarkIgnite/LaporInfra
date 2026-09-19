@@ -79,7 +79,7 @@ export interface AdminUser {
   avatarUrl?: string;
 }
 
-export type UserRole = 'warga' | 'petugas';
+export type UserRole = 'warga' | 'petugas' | 'super_admin';
 
 export interface AuthUserProfile {
   uid: string;

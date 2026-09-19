@@ -37,6 +37,9 @@ import {
 } from '../utils/helpers';
 import { upvoteReport } from '../services/api';
 import { ReportStatusTracker } from './ReportStatusTracker';
+import { SuperAdminEditModal } from './SuperAdminEditModal';
+import { useAuth } from '../context/AuthContext';
+import { Crown, Edit3 } from 'lucide-react';
 
 interface ReportDetailModalProps {
   report: InfrastructureReport | null;
@@ -55,9 +58,14 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   onOpenAdminUpdate,
   isAdmin,
 }) => {
+  const { userProfile } = useAuth();
+  const isSuperAdmin = userProfile?.role === 'super_admin';
+
   const miniMapRef = useRef<HTMLDivElement | null>(null);
   const miniMapInstance = useRef<L.Map | null>(null);
 
+  const [localReport, setLocalReport] = useState<InfrastructureReport | null>(report);
+  const [isSuperAdminEditOpen, setIsSuperAdminEditOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [upvoted, setUpvoted] = useState(false);
   const [currentUpvotes, setCurrentUpvotes] = useState(report?.upvotes || 1);
@@ -65,6 +73,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
+    setLocalReport(report);
     if (report) {
       setCurrentUpvotes(report.upvotes || 1);
       setUpvoted(false);
@@ -131,9 +140,10 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
   if (!isOpen || !report) return null;
 
-  const sevStyle = getSeverityStyle(report.tingkat_keparahan);
-  const stStyle = getStatusStyle(report.status);
-  const shareUrl = getReportShareUrl(report.id);
+  const activeReport = localReport || report;
+  const sevStyle = getSeverityStyle(activeReport.tingkat_keparahan);
+  const stStyle = getStatusStyle(activeReport.status);
+  const shareUrl = getReportShareUrl(activeReport.id);
 
   const handleCopyLink = async () => {
     try {
@@ -149,8 +159,8 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
   const handleNativeShare = async () => {
     const success = await shareReport(
-      `LaporInfra: ${report.kategori} - ${report.ticketNumber}`,
-      `Laporan kerusakan infrastruktur ${report.kategori} di ${report.location.address}`,
+      `LaporInfra: ${activeReport.kategori} - ${activeReport.ticketNumber}`,
+      `Laporan kerusakan infrastruktur ${activeReport.kategori} di ${activeReport.location.address}`,
       shareUrl
     );
     if (success) {
@@ -162,7 +172,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   const handleUpvoteClick = async () => {
     if (upvoted) return;
     try {
-      const newCount = await upvoteReport(report.id);
+      const newCount = await upvoteReport(activeReport.id);
       setCurrentUpvotes(newCount);
       setUpvoted(true);
       if (onReportsUpdated) onReportsUpdated();
@@ -178,15 +188,34 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4 bg-stone-50/90">
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs sm:text-sm font-bold text-amber-800 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-              {report.ticketNumber}
+              {activeReport.ticketNumber}
             </span>
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${stStyle.badge}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${stStyle.dot}`}></span>
-              <span>{report.status}</span>
+              <span>{activeReport.status}</span>
             </span>
+            {isSuperAdmin && (
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-[10px] font-black text-amber-800">
+                <Crown className="h-3 w-3 text-amber-600" />
+                Super Admin Mode
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Super Admin Edit Action */}
+            {isSuperAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsSuperAdminEditOpen(true)}
+                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:from-amber-600 hover:to-orange-700 active:scale-95 transition-all"
+                title="Super Admin: Edit judul, foto, deskripsi, keparahan, status, lokasi"
+              >
+                <Crown className="h-3.5 w-3.5 text-amber-100" />
+                <span>Edit Laporan</span>
+              </button>
+            )}
+
             <button
               onClick={handleNativeShare}
               className="flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-2xs"
@@ -214,8 +243,8 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
               {/* Photo Display */}
               <div className="relative rounded-3xl overflow-hidden bg-stone-950 shadow-md border border-stone-200 group">
                 <img
-                  src={report.imageUrl}
-                  alt={report.kategori}
+                  src={activeReport.imageUrl}
+                  alt={activeReport.kategori}
                   className="w-full h-64 object-cover group-hover:scale-102 transition-transform duration-300"
                   referrerPolicy="no-referrer"
                 />
@@ -227,7 +256,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                     style={{ backgroundColor: sevStyle.colorHex }}
                   >
                     <AlertTriangle className="h-3.5 w-3.5" />
-                    <span>{report.tingkat_keparahan}</span>
+                    <span>{activeReport.tingkat_keparahan}</span>
                   </span>
                 </div>
 
@@ -250,7 +279,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                     <span>Titik Lokasi Kejadian</span>
                   </span>
                   <span className="text-[11px] font-mono text-stone-500 font-normal">
-                    {report.location.lat.toFixed(4)}, {report.location.lng.toFixed(4)}
+                    {activeReport.location.lat.toFixed(4)}, {activeReport.location.lng.toFixed(4)}
                   </span>
                 </div>
 
@@ -260,7 +289,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 />
 
                 <p className="text-xs text-stone-700 font-medium">
-                  {report.location.address}
+                  {activeReport.location.address}
                 </p>
               </div>
 
@@ -304,7 +333,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 <div className="grid grid-cols-2 gap-2">
                   {/* WhatsApp */}
                   <a
-                    href={getWhatsAppShareUrl(report)}
+                    href={getWhatsAppShareUrl(activeReport)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 text-xs font-bold transition-all shadow-xs hover:shadow-md"
@@ -315,7 +344,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
                   {/* Telegram */}
                   <a
-                    href={getTelegramShareUrl(report)}
+                    href={getTelegramShareUrl(activeReport)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white py-2 px-3 text-xs font-bold transition-all shadow-xs hover:shadow-md"
@@ -326,7 +355,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
                   {/* Twitter / X */}
                   <a
-                    href={getTwitterShareUrl(report)}
+                    href={getTwitterShareUrl(activeReport)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 rounded-2xl bg-stone-900 hover:bg-black text-white py-2 px-3 text-xs font-bold transition-all shadow-xs hover:shadow-md"
@@ -337,7 +366,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
                   {/* Facebook */}
                   <a
-                    href={getFacebookShareUrl(report)}
+                    href={getFacebookShareUrl(activeReport)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 text-xs font-bold transition-all shadow-xs hover:shadow-md"
@@ -392,7 +421,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                     <span>Klasifikasi AI Gemini</span>
                   </span>
                   <span className="text-xs font-bold text-stone-700">
-                    Kategori: {report.kategori}
+                    Kategori: {activeReport.kategori}
                   </span>
                 </div>
 
@@ -401,7 +430,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                     Ringkasan Kerusakan Otomatis
                   </h4>
                   <p className="text-xs text-stone-700 leading-relaxed bg-white p-3.5 rounded-2xl border border-stone-200/70">
-                    {report.deskripsi_otomatis}
+                    {activeReport.deskripsi_otomatis}
                   </p>
                 </div>
 
@@ -411,33 +440,33 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                     <span>Rekomendasi Prioritas &amp; Standar Respon (SLA)</span>
                   </h4>
                   <p className="text-xs text-stone-600 leading-relaxed bg-white p-3.5 rounded-2xl border border-stone-200/70">
-                    {report.rekomendasi_prioritas}
+                    {activeReport.rekomendasi_prioritas}
                   </p>
                 </div>
               </div>
 
               {/* Citizen Manual Note (if any) */}
-              {report.deskripsi_manual && (
+              {activeReport.deskripsi_manual && (
                 <div className="rounded-3xl border border-stone-200 bg-white p-4 space-y-1.5 shadow-2xs">
                   <h5 className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5 text-stone-500" />
-                    <span>Catatan Lapangan dari Pelapor ({report.reporterName || 'Warga'})</span>
+                    <span>Catatan Lapangan dari Pelapor ({activeReport.reporterName || 'Warga'})</span>
                   </h5>
                   <p className="text-xs text-stone-600 italic bg-stone-50 p-3 rounded-2xl">
-                    &ldquo;{report.deskripsi_manual}&rdquo;
+                    &ldquo;{activeReport.deskripsi_manual}&rdquo;
                   </p>
                 </div>
               )}
 
               {/* Dinas Action Notes (if any) */}
-              {report.dinasNotes && (
+              {activeReport.dinasNotes && (
                 <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-4 space-y-1.5 shadow-2xs">
                   <h5 className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
                     <Building2 className="h-3.5 w-3.5 text-amber-700" />
                     <span>Catatan Penanganan Dinas PU</span>
                   </h5>
                   <p className="text-xs text-amber-900 bg-white/90 p-3 rounded-2xl border border-amber-200/50">
-                    {report.dinasNotes}
+                    {activeReport.dinasNotes}
                   </p>
                 </div>
               )}
@@ -457,7 +486,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
                   {isAdmin && onOpenAdminUpdate && (
                     <button
-                      onClick={() => onOpenAdminUpdate(report)}
+                      onClick={() => onOpenAdminUpdate(activeReport)}
                       className="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-stone-800 active:scale-95 transition-all"
                     >
                       <Wrench className="h-3.5 w-3.5 text-amber-400" />
@@ -467,7 +496,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 </div>
 
                 {/* Status Progression Visual Stepper */}
-                <ReportStatusTracker report={report} />
+                <ReportStatusTracker report={activeReport} />
               </div>
             </div>
           </div>
@@ -475,7 +504,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
         {/* Footer */}
         <div className="border-t border-stone-200 bg-stone-50 px-6 py-3.5 flex items-center justify-between text-xs text-stone-500">
-          <span>Dibuat: {formatIndonesianDate(report.createdAt)}</span>
+          <span>Dibuat: {formatIndonesianDate(activeReport.createdAt)}</span>
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyLink}
@@ -511,7 +540,7 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         >
           <div className="relative max-w-5xl max-h-[90vh]">
             <img
-              src={report.imageUrl}
+              src={activeReport.imageUrl}
               alt="Foto Detail Perbesar"
               className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
               referrerPolicy="no-referrer"
@@ -524,6 +553,23 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             </button>
           </div>
         </div>
+      )}
+
+      {/* Super Admin Edit Modal */}
+      {isSuperAdmin && (
+        <SuperAdminEditModal
+          report={activeReport}
+          isOpen={isSuperAdminEditOpen}
+          onClose={() => setIsSuperAdminEditOpen(false)}
+          onSaved={(updated) => {
+            setLocalReport(updated);
+            if (onReportsUpdated) onReportsUpdated();
+          }}
+          onDeleted={() => {
+            if (onReportsUpdated) onReportsUpdated();
+            onClose();
+          }}
+        />
       )}
     </div>
   );

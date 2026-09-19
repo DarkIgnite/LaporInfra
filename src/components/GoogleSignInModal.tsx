@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Check, User, Building2, Plus, Sparkles } from 'lucide-react';
+import { X, Check, User, Building2, Plus, Sparkles, Crown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { UserRole } from '../types';
 
 interface GoogleSignInModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
     name: string,
     email: string,
     photoURL: string,
-    role: 'warga' | 'petugas' = 'warga'
+    role: UserRole = 'warga'
   ) => {
     loginWithGoogleProfile({
       displayName: name,
@@ -152,19 +153,47 @@ export const GoogleSignInModal: React.FC<GoogleSignInModalProps> = ({
                     'petugas'
                   )
                 }
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-amber-500 hover:bg-amber-50/50 text-left transition-all group"
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 text-left transition-all group"
               >
-                <div className="h-9 w-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
                   <Building2 className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-bold text-gray-900 truncate">Petugas Dinas PU</p>
-                    <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded-full">
+                    <span className="text-[9px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.2 rounded-full">
                       Petugas
                     </span>
                   </div>
                   <p className="text-[11px] text-gray-500 truncate">petugas.pu@dinas.go.id</p>
+                </div>
+              </button>
+
+              {/* Preset 3: Super Admin */}
+              <button
+                type="button"
+                onClick={() =>
+                  handleSelectPreset(
+                    'Ryan F. (Super Admin)',
+                    'superadmin.ryan@laporinfra.go.id',
+                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+                    'super_admin'
+                  )
+                }
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-amber-300 bg-amber-50/40 hover:border-amber-500 hover:bg-amber-50 text-left transition-all group shadow-2xs"
+              >
+                <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                  <Crown className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-gray-900 truncate">Ryan F. (Super Admin)</p>
+                    <span className="text-[9px] font-extrabold text-amber-900 bg-amber-200 border border-amber-300 px-1.5 py-0.2 rounded-full flex items-center gap-0.5">
+                      <Crown className="h-2.5 w-2.5 text-amber-700" />
+                      Super Admin
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 truncate">superadmin.ryan@laporinfra.go.id</p>
                 </div>
               </button>
 

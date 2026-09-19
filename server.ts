@@ -878,7 +878,46 @@ app.post('/api/reports/:id/upvote', (req, res) => {
   res.json({ upvotes: report.upvotes });
 });
 
-// 8. Reset reports to initial seed
+// 8. Super Admin: Update full report details (title, photos, description, severity, status, location)
+app.put('/api/reports/:id', (req, res) => {
+  const { id } = req.params;
+  const index = reportsDatabase.findIndex((r) => r.id === id || r.ticketNumber === id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Laporan tidak ditemukan' });
+  }
+
+  const existing = reportsDatabase[index];
+  const now = new Date().toISOString();
+  const updates = req.body;
+
+  const updatedReport: InfrastructureReportStore = {
+    ...existing,
+    ...updates,
+    id: existing.id,
+    ticketNumber: existing.ticketNumber,
+    updatedAt: now,
+  };
+
+  reportsDatabase[index] = updatedReport;
+  res.json({
+    message: 'Laporan berhasil diperbarui oleh Super Admin',
+    report: updatedReport
+  });
+});
+
+// 9. Super Admin: Delete report
+app.delete('/api/reports/:id', (req, res) => {
+  const { id } = req.params;
+  const index = reportsDatabase.findIndex((r) => r.id === id || r.ticketNumber === id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Laporan tidak ditemukan' });
+  }
+
+  reportsDatabase.splice(index, 1);
+  res.json({ message: 'Laporan berhasil dihapus oleh Super Admin', success: true });
+});
+
+// 10. Reset reports to initial seed
 app.post('/api/reports/reset', (req, res) => {
   reportsDatabase = JSON.parse(JSON.stringify(INITIAL_REPORTS));
   res.json({ message: 'Database laporan berhasil di-reset ke data demo awal', count: reportsDatabase.length });
