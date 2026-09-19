@@ -58,40 +58,24 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
     return L.divIcon({
       className: 'damage-pin-picker-marker',
       html: `
-        <div style="transform: translate(-50%, -100%); cursor: grab; display: flex; flex-col; items-center;">
-          <div style="
-            background: #ef4444;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 11px;
-            font-weight: 800;
-            border: 2px solid white;
-            box-shadow: 0 4px 14px rgba(239,68,68,0.45);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
-          ">
-            <span>📍 Titik Kerusakan</span>
-          </div>
-          <div style="
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 8px solid #ef4444;
-            margin: -1px auto 0 auto;
-          "></div>
+        <div style="width: 38px; height: 52px; position: relative; cursor: grab; user-select: none;">
+          <svg width="38" height="52" viewBox="0 0 38 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));">
+            <path d="M19 0C8.50659 0 0 8.50659 0 19C0 32 19 52 19 52C19 52 38 32 38 19C38 8.50659 29.4934 0 19 0Z" fill="#ef4444"/>
+            <path d="M19 1.5C9.33502 1.5 1.5 9.33502 1.5 19C1.5 30.5 19 49.5 19 49.5C19 49.5 36.5 30.5 36.5 19C36.5 9.33502 28.665 1.5 19 1.5Z" stroke="white" stroke-width="1.5"/>
+            <circle cx="19" cy="19" r="8.5" fill="white"/>
+            <path d="M19 14V20M19 23.5H19.01" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
         </div>
       `,
-      iconSize: [120, 42],
-      iconAnchor: [60, 42]
+      iconSize: [38, 52],
+      iconAnchor: [19, 52]
     });
   };
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    let resizeObserver: ResizeObserver | null = null;
 
     if (!mapRef.current) {
       const map = L.map(containerRef.current, {
@@ -109,7 +93,8 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       // Create draggable pin marker
       const marker = L.marker([lat, lng], {
         icon: createDamagePinIcon(),
-        draggable: true
+        draggable: true,
+        autoPan: true
       }).addTo(map);
 
       marker.on('dragend', () => {
@@ -127,24 +112,35 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       mapRef.current = map;
       markerRef.current = marker;
 
-      // Invalidate size after modal render
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 250);
+      // Invalidate size immediately and after modal animation settles
+      map.invalidateSize();
+      const t1 = setTimeout(() => map.invalidateSize(), 100);
+      const t2 = setTimeout(() => map.invalidateSize(), 300);
+
+      if (window.ResizeObserver && containerRef.current) {
+        resizeObserver = new ResizeObserver(() => {
+          map.invalidateSize();
+        });
+        resizeObserver.observe(containerRef.current);
+      }
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        if (resizeObserver) resizeObserver.disconnect();
+        if (mapRef.current) {
+          mapRef.current.remove();
+          mapRef.current = null;
+          markerRef.current = null;
+        }
+      };
     } else {
       mapRef.current.setView([lat, lng], mapRef.current.getZoom());
       if (markerRef.current) {
         markerRef.current.setLatLng([lat, lng]);
       }
+      mapRef.current.invalidateSize();
     }
-
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-        markerRef.current = null;
-      }
-    };
   }, []);
 
   // Update marker position when lat/lng props change from outside
@@ -191,7 +187,7 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
 
       {/* Leaflet Map Canvas */}
       <div className="relative h-56 sm:h-64 w-full">
-        <div ref={containerRef} className="h-full w-full" />
+        <div ref={containerRef} className="h-full w-full [&_.leaflet-grab]:cursor-crosshair [&_.leaflet-container]:cursor-crosshair cursor-crosshair" />
         {/* Floating Instruction Banner */}
         <div className="absolute bottom-2 inset-x-2 z-[500] pointer-events-none flex justify-center">
           <div className="bg-white/95 backdrop-blur-xs border border-gray-200 rounded-lg px-3 py-1 shadow-sm text-[10px] font-medium text-gray-700 text-center">

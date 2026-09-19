@@ -82,7 +82,7 @@ const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMa
       const isPothole = report.kategori.toLowerCase().includes('jalan') || report.kategori.toLowerCase().includes('lubang');
 
       const iconHtml = `
-        <div class="cursor-pointer group flex flex-col items-center" style="transform: translate(-50%, -100%);">
+        <div class="cursor-pointer group flex flex-col items-center justify-end" style="width: 120px; height: 36px; user-select: none;">
           <div style="
             display: flex;
             align-items: center;
