@@ -426,23 +426,23 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[9999] isolate flex items-end sm:items-center justify-center sm:p-4 bg-black/50 font-sans">
-      <div className="relative w-full sm:max-w-lg bg-white sm:rounded-2xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[85vh]">
+      <div className="relative w-full sm:max-w-lg bg-white dark:bg-[#202124] border border-transparent dark:border-white/[0.1] sm:rounded-2xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-white/[0.08]">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500">
               <Camera className="h-3.5 w-3.5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900">Buat Laporan</h3>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">Buat Laporan</h3>
               {step !== 'initial' && (
-                <p className="text-[10px] text-gray-400">
+                <p className="text-[10px] text-gray-400 dark:text-stone-400">
                   {step === 'analyzing' ? 'AI menganalisis...' : step === 'review' ? 'Periksa & kirim' : 'Laporan terkirim'}
                 </p>
               )}
             </div>
           </div>
-          <button onClick={onClose} className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+          <button onClick={onClose} className="rounded-full p-1.5 text-gray-400 dark:text-stone-400 hover:bg-gray-100 dark:hover:bg-white/[0.08] hover:text-gray-600 dark:hover:text-white transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -455,12 +455,12 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
             <div className="space-y-4">
               {/* Location bar */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/[0.04] rounded-xl border border-gray-200 dark:border-white/[0.08]">
                   <div className="flex items-center gap-2 min-w-0">
                     <MapPin className="h-4 w-4 text-amber-600 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-gray-800 truncate">{location.city || 'Mendeteksi lokasi...'}</p>
-                      <p className="text-[10px] text-gray-500 truncate">{isReverseGeocoding ? 'Mengambil alamat titik baru...' : location.address}</p>
+                      <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{location.city || 'Mendeteksi lokasi...'}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-stone-400 truncate">{isReverseGeocoding ? 'Mengambil alamat titik baru...' : location.address}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -470,7 +470,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                       className={`text-[11px] font-bold flex items-center gap-1 rounded-lg px-2.5 py-1 transition-all ${
                         showMapPicker
                           ? 'bg-amber-500 text-white shadow-xs'
-                          : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-50'
+                          : 'bg-white dark:bg-white/[0.06] border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-500/10'
                       }`}
                     >
                       <MapIcon className="h-3.5 w-3.5" />
@@ -480,7 +480,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                       type="button"
                       onClick={detectLocation}
                       disabled={isLocating}
-                      className="text-[11px] font-semibold text-gray-600 hover:text-gray-900 border border-gray-200 bg-white rounded-lg px-2 py-1 flex items-center gap-1"
+                      className="text-[11px] font-semibold text-gray-600 dark:text-stone-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.06] rounded-lg px-2 py-1 flex items-center gap-1"
                       title="Gunakan GPS lokasi saya"
                     >
                       <Crosshair className={`h-3 w-3 ${isLocating ? 'animate-spin text-amber-600' : ''}`} />
@@ -490,18 +490,18 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowCityDropdown(!showCityDropdown)}
-                        className="text-[11px] font-semibold text-gray-500 hover:text-gray-700 border border-gray-200 bg-white rounded-lg px-2 py-1"
+                        className="text-[11px] font-semibold text-gray-500 dark:text-stone-300 hover:text-gray-700 dark:hover:text-white border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.06] rounded-lg px-2 py-1"
                       >
                         Kota ▾
                       </button>
                       {showCityDropdown && (
-                        <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-white rounded-xl border border-gray-200 shadow-xl p-1 max-h-48 overflow-y-auto">
+                        <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-white dark:bg-[#28292c] rounded-xl border border-gray-200 dark:border-white/[0.1] shadow-xl p-1 max-h-48 overflow-y-auto">
                           {INDONESIA_CITY_PRESETS.map((c) => (
                             <button
                               key={c.name}
                               type="button"
                               onClick={() => handleSelectCityPreset(c)}
-                              className="w-full text-left px-2.5 py-1.5 text-xs hover:bg-amber-50 text-gray-700 rounded-lg"
+                              className="w-full text-left px-2.5 py-1.5 text-xs hover:bg-amber-50 dark:hover:bg-white/[0.08] text-gray-700 dark:text-stone-200 rounded-lg"
                             >
                               {c.name}
                             </button>
@@ -529,19 +529,19 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
 
               {/* Photo actions */}
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tambahkan Foto Kerusakan</p>
+                <p className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase tracking-wide">Tambahkan Foto Kerusakan</p>
                 <button
                   id="open-realtime-camera-btn"
                   type="button"
                   onClick={() => { setCameraModalMode('camera'); setShowCameraModal(true); }}
-                  className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-amber-500 bg-amber-50 hover:bg-amber-100/70 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-amber-500 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100/70 dark:hover:bg-amber-500/20 transition-colors text-left"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shrink-0 shadow-xs">
                     <Camera className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-amber-950">Buka Kamera</p>
-                    <p className="text-xs text-amber-800">Foto langsung, AI analisis otomatis</p>
+                    <p className="text-sm font-bold text-amber-950 dark:text-amber-300">Buka Kamera</p>
+                    <p className="text-xs text-amber-800 dark:text-amber-200/90 font-medium">Foto langsung, AI analisis otomatis</p>
                   </div>
                 </button>
 
@@ -550,36 +550,36 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                     id="open-upload-modal-btn"
                     type="button"
                     onClick={() => { setCameraModalMode('upload'); setShowCameraModal(true); }}
-                    className="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-left"
+                    className="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.04] hover:bg-gray-50 dark:hover:bg-white/[0.08] transition-colors text-left"
                   >
-                    <Upload className="h-4 w-4 text-gray-500 shrink-0" />
+                    <Upload className="h-4 w-4 text-gray-500 dark:text-stone-400 shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-gray-800">Unggah Foto</p>
-                      <p className="text-[10px] text-gray-500">dari Galeri</p>
+                      <p className="text-xs font-semibold text-gray-800 dark:text-white">Unggah Foto</p>
+                      <p className="text-[10px] text-gray-500 dark:text-stone-400">dari Galeri</p>
                     </div>
                   </button>
                   <button
                     id="open-preset-modal-btn"
                     type="button"
                     onClick={() => { setCameraModalMode('preset'); setShowCameraModal(true); }}
-                    className="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-left"
+                    className="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 dark:border-white/[0.08] bg-white dark:bg-white/[0.04] hover:bg-gray-50 dark:hover:bg-white/[0.08] transition-colors text-left"
                   >
-                    <Image className="h-4 w-4 text-gray-500 shrink-0" />
+                    <Image className="h-4 w-4 text-gray-500 dark:text-stone-400 shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-gray-800">Foto Contoh</p>
-                      <p className="text-[10px] text-gray-500">Demo / Pengujian</p>
+                      <p className="text-xs font-semibold text-gray-800 dark:text-white">Foto Contoh</p>
+                      <p className="text-[10px] text-gray-500 dark:text-stone-400">Demo / Pengujian</p>
                     </div>
                   </button>
                 </div>
               </div>
 
               {!user && (
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                  <p className="text-xs text-gray-600">Masuk untuk lacak laporan kamu</p>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/[0.04] rounded-xl border border-gray-100 dark:border-white/[0.08]">
+                  <p className="text-xs text-gray-600 dark:text-stone-300">Masuk untuk lacak laporan kamu</p>
                   <button
                     type="button"
                     onClick={() => signInWithGoogle()}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 hover:text-amber-700"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
                   >
                     <svg className="h-3.5 w-3.5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -598,12 +598,12 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
           {step === 'analyzing' && (
             <div className="py-16 text-center space-y-4">
               <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-4 border-amber-100 border-t-amber-500 animate-spin" />
-                <Sparkles className="h-6 w-6 text-amber-600" />
+                <div className="absolute inset-0 rounded-full border-4 border-amber-100 dark:border-amber-900/40 border-t-amber-500 animate-spin" />
+                <Sparkles className="h-6 w-6 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-800">AI menganalisis foto...</p>
-                <p className="text-xs text-gray-500 mt-1">Mengklasifikasi jenis & tingkat bahaya</p>
+                <p className="text-sm font-semibold text-gray-800 dark:text-white">AI menganalisis foto...</p>
+                <p className="text-xs text-gray-500 dark:text-stone-400 mt-1">Mengklasifikasi jenis & tingkat bahaya</p>
               </div>
             </div>
           )}
@@ -612,7 +612,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
           {step === 'review' && (
             <form onSubmit={handleSubmit} className="space-y-4">
               {isInvalidInfraWarning && (
-                <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/40 rounded-xl text-xs text-amber-800 dark:text-amber-200">
                   <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                   <p>Infrastruktur tidak terdeteksi jelas. Pilih kategori manual di bawah.</p>
                 </div>
@@ -620,7 +620,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
 
               {/* Photo + AI summary */}
               <div className="flex gap-3">
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-white/[0.06] shrink-0 border border-gray-200 dark:border-white/[0.1]">
                   {photoBase64 && <img src={photoBase64} alt="Foto" className="h-full w-full object-cover" />}
                   <button
                     type="button"
@@ -633,20 +633,20 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                    <span className="text-[11px] font-bold text-amber-800">Analisis AI</span>
+                    <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300">Analisis AI</span>
                     {aiResult?.skor_keparahan && (
-                      <span className="text-[10px] text-gray-500">Skor: {aiResult.skor_keparahan}/10</span>
+                      <span className="text-[10px] text-gray-500 dark:text-stone-400">Skor: {aiResult.skor_keparahan}/10</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-700 leading-snug line-clamp-3">{autoDescription || 'Kerusakan terdeteksi'}</p>
+                  <p className="text-xs text-gray-700 dark:text-stone-200 leading-snug line-clamp-3">{autoDescription || 'Kerusakan terdeteksi'}</p>
                 </div>
               </div>
 
               {/* Judul Laporan */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-stone-300 mb-1.5 flex items-center justify-between">
                   <span>Judul Laporan</span>
-                  <span className="text-[10px] text-amber-600 font-normal">Wajib diisi</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-normal">Wajib diisi</span>
                 </label>
                 <input
                   type="text"
@@ -654,36 +654,40 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Contoh: Lubang Aspal Ambles di Lajur Kanan..."
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-lg border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[#28292c] px-3 py-2 text-xs text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-stone-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
 
               {/* Category & Severity */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Kategori</label>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-stone-300 mb-1.5">Kategori</label>
                   <select
                     id="select-report-category"
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value as DamageCategory)}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-800 focus:border-amber-500 focus:outline-none"
+                    className="w-full rounded-lg border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[#28292c] px-3 py-2 text-xs text-gray-800 dark:text-white focus:border-amber-500 focus:outline-none"
                   >
                     {CATEGORY_OPTIONS.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Keparahan</label>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-stone-300 mb-1.5">Keparahan</label>
                   <div className="grid grid-cols-3 gap-1">
                     {SEVERITY_OPTIONS.map((sev) => {
                       const isSelected = selectedSeverity === sev;
-                      const colors = { Ringan: 'border-green-500 bg-green-50 text-green-700', Sedang: 'border-amber-500 bg-amber-50 text-amber-700', Berat: 'border-red-500 bg-red-50 text-red-700' };
+                      const colors = {
+                        Ringan: 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300',
+                        Sedang: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300',
+                        Berat: 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300'
+                      };
                       return (
                         <button
                           key={sev}
                           type="button"
                           onClick={() => setSelectedSeverity(sev)}
                           className={`py-2 rounded-lg border text-[10px] font-bold transition-all ${
-                            isSelected ? colors[sev] + ' border-2' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+                            isSelected ? colors[sev] + ' border-2' : 'border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[#28292c] text-gray-500 dark:text-stone-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]'
                           }`}
                         >
                           {sev}
@@ -697,14 +701,14 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
               {/* Location with Interactive Pin Trigger */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5 text-amber-600" />
+                  <label className="text-xs font-semibold text-gray-700 dark:text-stone-300 flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                     <span>Titik Lokasi &amp; Alamat</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowMapPicker(!showMapPicker)}
-                    className="text-[11px] font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1"
+                    className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 flex items-center gap-1"
                   >
                     <MapIcon className="h-3.5 w-3.5" />
                     <span>{showMapPicker ? 'Tutup Peta' : '📍 Pasang Pin di Peta'}</span>
@@ -728,45 +732,45 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                   required
                   value={location.address || ''}
                   onChange={(e) => setLocation({ ...location, address: e.target.value })}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-lg border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[#28292c] px-3 py-2 text-xs text-gray-800 dark:text-white focus:border-amber-500 focus:outline-none"
                   placeholder="Alamat lokasi kerusakan"
                 />
-                <div className="flex items-center justify-between text-[10px] text-gray-400 px-0.5">
+                <div className="flex items-center justify-between text-[10px] text-gray-400 dark:text-stone-400 px-0.5">
                   <span>Koordinat: {location.lat.toFixed(5)}, {location.lng.toFixed(5)} ({location.city})</span>
-                  {isReverseGeocoding && <span className="text-amber-600 font-semibold animate-pulse">Menyelaraskan alamat titik baru...</span>}
+                  {isReverseGeocoding && <span className="text-amber-600 dark:text-amber-400 font-semibold animate-pulse">Menyelaraskan alamat titik baru...</span>}
                 </div>
               </div>
 
               {/* Notes & Name */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Catatan (opsional)</label>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-stone-300 mb-1.5">Catatan (opsional)</label>
                   <textarea
                     rows={2}
                     value={manualDescription}
                     onChange={(e) => setManualDescription(e.target.value)}
                     placeholder="Info tambahan..."
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:border-amber-500 focus:outline-none resize-none"
+                    className="w-full rounded-lg border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[#28292c] px-3 py-2 text-xs text-gray-800 dark:text-white focus:border-amber-500 focus:outline-none resize-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Nama Pelapor</label>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-stone-300 mb-1.5">Nama Pelapor</label>
                   <input
                     type="text"
                     value={reporterName}
                     onChange={(e) => setReporterName(e.target.value)}
                     placeholder={user?.displayName || 'Nama kamu'}
-                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:border-amber-500 focus:outline-none"
+                    className="w-full rounded-lg border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[#28292c] px-3 py-2 text-xs text-gray-800 dark:text-white focus:border-amber-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setStep('initial')}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                  className="rounded-lg border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] px-4 py-2 text-xs font-semibold text-gray-600 dark:text-stone-300 hover:bg-gray-50 dark:hover:bg-white/[0.08]"
                 >
                   ← Kembali
                 </button>
@@ -789,14 +793,14 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
           {/* STEP 4: SUCCESS */}
           {step === 'success' && (
             <div className="py-12 text-center space-y-4">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/40">
+                <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-gray-900">Laporan Terkirim!</h4>
-                <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">Laporan kamu sudah masuk dan diteruskan ke dinas terkait.</p>
+                <h4 className="text-base font-bold text-gray-900 dark:text-white">Laporan Terkirim!</h4>
+                <p className="text-xs text-gray-500 dark:text-stone-400 mt-1 max-w-xs mx-auto">Laporan kamu sudah masuk dan diteruskan ke dinas terkait.</p>
                 <div className="mt-3">
-                  <span className="inline-block rounded-lg bg-gray-900 px-4 py-2 text-sm font-mono font-bold text-emerald-400">
+                  <span className="inline-block rounded-lg bg-gray-900 dark:bg-[#121315] border border-transparent dark:border-white/[0.1] px-4 py-2 text-sm font-mono font-bold text-emerald-400">
                     {createdTicketNumber}
                   </span>
                 </div>

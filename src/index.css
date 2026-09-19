@@ -523,6 +523,12 @@ html.dark a:focus-visible {
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4) !important;
 }
 
+/* Clean up harsh white outlines and borders in Dark Mode */
+html.dark [class*="border-stone-"]:not([class*="border-amber-"]):not([class*="border-emerald-"]):not([class*="border-red-"]):not([class*="border-rose-"]):not([class*="border-green-"]),
+html.dark [class*="border-gray-"]:not([class*="border-amber-"]):not([class*="border-emerald-"]):not([class*="border-red-"]):not([class*="border-rose-"]):not([class*="border-green-"]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Incident Markers in Dark Mode - High Contrast & Elevated Design */
 html.dark .google-incident-marker .text-slate-800,
 html.dark .google-incident-marker .text-slate-900 {

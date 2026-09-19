@@ -136,20 +136,20 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] py-8 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[#fafaf9] dark:bg-[#18191a] py-8 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="mx-auto max-w-[1360px] space-y-6">
         {/* Header & Title */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200/80 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200/80 dark:border-white/[0.08] pb-6">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white tracking-tight">
                 Daftar Laporan Publik
               </h1>
-              <span className="rounded-full bg-stone-200 px-3 py-0.5 text-xs font-bold text-stone-700">
+              <span className="rounded-full bg-stone-200 dark:bg-white/[0.08] px-3 py-0.5 text-xs font-bold text-stone-700 dark:text-stone-300">
                 {filteredReportsList.length} Laporan
               </span>
             </div>
-            <p className="mt-1.5 text-xs sm:text-sm text-stone-500 max-w-2xl leading-relaxed">
+            <p className="mt-1.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-2xl leading-relaxed">
               Transparansi kondisi infrastruktur kota. Seluruh laporan diverifikasi otomatis oleh AI Vision Gemini dan diprioritaskan penanganannya oleh dinas terkait.
             </p>
           </div>
@@ -164,7 +164,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
         </div>
 
         {/* Filter Bar */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-stone-200/80 space-y-3">
+        <div className="bg-white dark:bg-[#202124] rounded-2xl p-4 sm:p-5 shadow-xs border border-stone-200/80 dark:border-white/[0.08] space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Search Input */}
             <div className="relative sm:col-span-2 lg:col-span-2">
@@ -175,7 +175,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari lokasi jalan, kota, deskripsi kerusakan, atau tiket..."
-                className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-10 pr-9 py-2.5 text-xs text-stone-800 placeholder-stone-400 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-hidden transition-all"
+                className="w-full rounded-xl border border-stone-200 dark:border-white/[0.1] bg-stone-50 dark:bg-[#28292c] pl-10 pr-9 py-2.5 text-xs text-stone-800 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:bg-white dark:focus:bg-[#202124] focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-hidden transition-all"
               />
               {searchQuery && (
                 <button
@@ -194,7 +194,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-semibold text-stone-700 focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors cursor-pointer"
+                className="w-full rounded-xl border border-stone-200 dark:border-white/[0.1] bg-stone-50 dark:bg-[#28292c] px-3 py-2.5 text-xs font-semibold text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-[#202124] focus:border-amber-500 focus:outline-hidden transition-colors cursor-pointer"
               >
                 <option value="Semua">Semua Kategori</option>
                 <option value="Jalan Berlubang">Jalan Berlubang</option>
@@ -211,7 +211,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
               <select
                 value={severityFilter}
                 onChange={(e) => setSeverityFilter(e.target.value)}
-                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-semibold text-stone-700 focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors cursor-pointer"
+                className="w-full rounded-xl border border-stone-200 dark:border-white/[0.1] bg-stone-50 dark:bg-[#28292c] px-3 py-2.5 text-xs font-semibold text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-[#202124] focus:border-amber-500 focus:outline-hidden transition-colors cursor-pointer"
               >
                 <option value="Semua">Semua Keparahan</option>
                 <option value="Berat">🔴 Tingkat Berat</option>
@@ -225,7 +225,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-semibold text-stone-700 focus:bg-white focus:border-amber-500 focus:outline-hidden transition-colors cursor-pointer"
+                className="w-full rounded-xl border border-stone-200 dark:border-white/[0.1] bg-stone-50 dark:bg-[#28292c] px-3 py-2.5 text-xs font-semibold text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-[#202124] focus:border-amber-500 focus:outline-hidden transition-colors cursor-pointer"
               >
                 <option value="Semua">Semua Status</option>
                 <option value="Baru">Baru (Antrean)</option>
@@ -236,8 +236,8 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
           </div>
 
           {/* Quick Sort Options */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-stone-100 text-xs">
-            <div className="flex items-center gap-1.5 text-stone-500">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-stone-100 dark:border-white/[0.08] text-xs">
+            <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400">
               <ArrowUpDown className="h-3.5 w-3.5 text-stone-400" />
               <span className="font-semibold">Urutkan:</span>
             </div>
@@ -254,7 +254,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                   className={`rounded-full px-3 py-1 font-semibold transition-colors ${
                     sortBy === s.key
                       ? 'bg-amber-500 text-white'
-                      : 'text-stone-600 hover:bg-stone-100'
+                      : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-white/5'
                   }`}
                 >
                   {s.label}
@@ -263,6 +263,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
             </div>
           </div>
         </div>
+
 
         {/* Active Search & Result Feedback Banner */}
         {searchQuery.trim() && (
@@ -318,7 +319,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                   key={report.id}
                   id={`report-card-${report.id}`}
                   onClick={() => onSelectReport(report.id)}
-                  className="group flex flex-col justify-between rounded-3xl border border-stone-200/80 bg-white shadow-2xs hover:shadow-lg hover:border-amber-300 transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1"
+                  className="group flex flex-col justify-between rounded-3xl border border-stone-200/80 dark:border-white/[0.08] bg-white dark:bg-[#202124] shadow-2xs hover:shadow-lg hover:border-amber-300 dark:hover:border-amber-500/50 transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1"
                 >
                   {/* Card Media Header */}
                   <div className="relative aspect-16/10 w-full overflow-hidden bg-stone-950">
@@ -377,30 +378,30 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                       </div>
 
                       {/* Report Title */}
-                      <h3 className="text-sm font-bold text-stone-900 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                      <h3 className="text-sm font-bold text-stone-900 dark:text-white line-clamp-1 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
                         {report.title || report.kategori}
                       </h3>
 
                       {/* AI Description summary */}
-                      <p className="text-xs font-normal text-stone-600 line-clamp-2 leading-relaxed">
+                      <p className="text-xs font-normal text-stone-600 dark:text-stone-300 line-clamp-2 leading-relaxed">
                         {report.deskripsi_otomatis}
                       </p>
 
                       {/* Location snippet */}
-                      <div className="flex items-center gap-1.5 text-[11px] text-stone-500">
+                      <div className="flex items-center gap-1.5 text-[11px] text-stone-500 dark:text-stone-400">
                         <MapPin className="h-3.5 w-3.5 text-amber-600 shrink-0" />
                         <span className="truncate">{report.location.address}</span>
                       </div>
                     </div>
 
                     {/* Card Footer Actions */}
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-stone-100 dark:border-white/[0.08] flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         {/* Upvote support counter */}
                         <button
                           type="button"
                           onClick={(e) => handleUpvote(e, report.id)}
-                          className="flex items-center gap-1.5 rounded-full bg-stone-50 border border-stone-200/80 px-2.5 sm:px-3 py-1 text-xs font-bold text-stone-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300 transition-colors"
+                          className="flex items-center gap-1.5 rounded-full bg-stone-50 dark:bg-white/[0.05] border border-stone-200/80 dark:border-white/[0.08] px-2.5 sm:px-3 py-1 text-xs font-bold text-stone-700 dark:text-stone-300 hover:bg-amber-50 dark:hover:bg-white/[0.1] hover:text-amber-800 dark:hover:text-white hover:border-amber-300 transition-colors"
                           title="Dukung perbaikan laporan ini"
                         >
                           <ThumbsUp className="h-3.5 w-3.5" />
@@ -413,8 +414,8 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                           onClick={(e) => handleShare(e, report)}
                           className={`flex items-center gap-1 rounded-full border px-2.5 sm:px-3 py-1 text-xs font-bold transition-colors ${
                             copiedId === report.id
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                              : 'bg-stone-50 border-stone-200/80 text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/50'
+                              : 'bg-stone-50 dark:bg-white/[0.05] border-stone-200/80 dark:border-white/[0.08] text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/[0.1] hover:text-stone-900 dark:hover:text-white'
                           }`}
                           title="Bagikan Tautan Laporan"
                         >
@@ -433,7 +434,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                       </div>
 
                       {/* Click to details prompt */}
-                      <div className="flex items-center gap-1 text-xs font-bold text-amber-700 group-hover:translate-x-0.5 transition-transform">
+                      <div className="flex items-center gap-1 text-xs font-bold text-amber-700 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform">
                         <span>Lihat Detail</span>
                         <ChevronRight className="h-4 w-4" />
                       </div>
