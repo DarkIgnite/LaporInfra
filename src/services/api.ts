@@ -552,3 +552,96 @@ export async function sendGeminiChatMessage(params: {
     };
   }
 }
+
+// Category Images Management (Super Admin)
+export const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
+  'Jalan Berlubang': 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+  'Jembatan Retak': 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=80',
+  'Trotoar Rusak': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
+  'Lampu Jalan Mati': 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+  'Saluran Air Tersumbat': 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80',
+  'Fasilitas Publik Lainnya': 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80',
+};
+
+const CATEGORY_IMAGES_STORAGE_KEY = 'laporinfra_category_images_v1';
+
+export async function fetchCategoryImages(): Promise<Record<string, string>> {
+  let cached: Record<string, string> = { ...DEFAULT_CATEGORY_IMAGES };
+  try {
+    const raw = localStorage.getItem(CATEGORY_IMAGES_STORAGE_KEY);
+    if (raw) {
+      cached = { ...cached, ...JSON.parse(raw) };
+    }
+  } catch (e) {
+    console.warn('Error reading category images cache:', e);
+  }
+
+  // Also fetch from server to get latest updates
+  try {
+    const res = await fetch('/api/categories/images');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images) {
+        cached = { ...cached, ...data.images };
+        localStorage.setItem(CATEGORY_IMAGES_STORAGE_KEY, JSON.stringify(cached));
+      }
+    }
+  } catch (e) {
+    // offline fallback
+  }
+
+  return cached;
+}
+
+export async function updateCategoryImage(category: string, imageUrl: string): Promise<Record<string, string>> {
+  let current: Record<string, string> = { ...DEFAULT_CATEGORY_IMAGES };
+  try {
+    const raw = localStorage.getItem(CATEGORY_IMAGES_STORAGE_KEY);
+    if (raw) current = { ...current, ...JSON.parse(raw) };
+  } catch (e) {}
+
+  current[category] = imageUrl;
+  try {
+    localStorage.setItem(CATEGORY_IMAGES_STORAGE_KEY, JSON.stringify(current));
+  } catch (e) {}
+
+  // 1. Sync to server
+  try {
+    const res = await fetch('/api/categories/images', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, imageUrl }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images) current = data.images;
+    }
+  } catch (e) {
+    console.warn('Failed to update category image on server:', e);
+  }
+
+  // 2. Sync to Firestore
+  try {
+    await setDoc(doc(db, 'system_settings', 'category_images'), current, { merge: true });
+  } catch (e) {
+    console.warn('Firestore category images sync failed:', e);
+  }
+
+  return current;
+}
+
+export async function resetCategoryImages(): Promise<Record<string, string>> {
+  try {
+    localStorage.removeItem(CATEGORY_IMAGES_STORAGE_KEY);
+  } catch (e) {}
+
+  try {
+    const res = await fetch('/api/categories/images/reset', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      return data.images || DEFAULT_CATEGORY_IMAGES;
+    }
+  } catch (e) {}
+
+  return DEFAULT_CATEGORY_IMAGES;
+}

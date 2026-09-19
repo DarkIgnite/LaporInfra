@@ -22,9 +22,10 @@ import {
 } from 'lucide-react';
 import { InfrastructureReport, AdminUser, ReportStatus, DamageCategory, SeverityLevel } from '../types';
 import { getSeverityStyle, getStatusStyle, formatIndonesianDate } from '../utils/helpers';
-import { updateReportStatus, resetReportsToSeed } from '../services/api';
+import { updateReportStatus, resetReportsToSeed, fetchCategoryImages, DEFAULT_CATEGORY_IMAGES } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { SuperAdminEditModal } from './SuperAdminEditModal';
+import { CategoryPhotoEditModal } from './CategoryPhotoEditModal';
 
 interface AdminDashboardProps {
   reports: InfrastructureReport[];
@@ -50,6 +51,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Super Admin Edit Modal State
   const [superAdminEditingReport, setSuperAdminEditingReport] = useState<InfrastructureReport | null>(null);
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>(DEFAULT_CATEGORY_IMAGES);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (isSuperAdmin) {
+      fetchCategoryImages().then((imgs) => {
+        if (imgs) setCategoryImages(imgs);
+      });
+    }
+  }, [isSuperAdmin]);
 
   // Quick Status Edit Modal State
   const [editingReport, setEditingReport] = useState<InfrastructureReport | null>(null);
@@ -205,7 +216,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {isSuperAdmin && (
+              <button
+                type="button"
+                id="dashboard-edit-category-photos-btn"
+                onClick={() => setIsCategoryModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition-all active:scale-95"
+                title="Super Admin: Kelola dan ganti foto kategori beranda"
+              >
+                <Crown className="h-3.5 w-3.5 text-amber-100" />
+                <span>Foto Kategori Beranda</span>
+              </button>
+            )}
+
             <button
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 rounded-full bg-stone-800 px-4 py-2 text-xs font-bold text-stone-200 border border-stone-700 hover:bg-stone-700 hover:text-white transition-colors"
@@ -681,6 +705,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onDeleted={() => {
             setSuperAdminEditingReport(null);
             onReportsUpdated();
+          }}
+        />
+      )}
+
+      {/* Super Admin Category Photo Edit Modal */}
+      {isSuperAdmin && (
+        <CategoryPhotoEditModal
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          currentImages={categoryImages}
+          onSaved={(updated) => {
+            setCategoryImages(updated);
           }}
         />
       )}

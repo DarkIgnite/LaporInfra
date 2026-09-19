@@ -20,11 +20,16 @@ import {
   Navigation2,
   CircleAlert,
   CircleCheck,
-  Timer
+  Timer,
+  Crown,
+  Edit3
 } from 'lucide-react';
 import { InfrastructureReport } from '../types';
 import { DEMO_PRESET_IMAGES } from '../data/seedReports';
 import { formatTimeAgo } from '../utils/helpers';
+import { useAuth } from '../context/AuthContext';
+import { CategoryPhotoEditModal } from './CategoryPhotoEditModal';
+import { fetchCategoryImages, DEFAULT_CATEGORY_IMAGES } from '../services/api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -235,7 +240,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onSelectReport,
   onOpenSDGModal
 }) => {
+  const { userProfile } = useAuth();
+  const isSuperAdmin = userProfile?.role === 'super_admin';
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>(DEFAULT_CATEGORY_IMAGES);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [selectedEditCategory, setSelectedEditCategory] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    fetchCategoryImages().then((imgs) => {
+      if (imgs) setCategoryImages(imgs);
+    });
+  }, []);
 
   const totalCount = reports.length;
   const criticalCount = reports.filter((r) => r.tingkat_keparahan === 'Berat').length;
@@ -251,7 +268,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       title: 'Jalan Berlubang',
       categoryValue: 'Jalan Berlubang',
       desc: 'Pothole & retakan aspal di badan jalan',
-      image: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+      image: categoryImages['Jalan Berlubang'] || DEFAULT_CATEGORY_IMAGES['Jalan Berlubang'],
       count: reports.filter(r => r.kategori === 'Jalan Berlubang').length || 480,
       sla: '< 24 Jam',
       color: 'bg-red-500'
@@ -260,7 +277,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       title: 'Jembatan Retak',
       categoryValue: 'Jembatan Retak',
       desc: 'Kerusakan struktur sambungan jembatan',
-      image: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=80',
+      image: categoryImages['Jembatan Retak'] || DEFAULT_CATEGORY_IMAGES['Jembatan Retak'],
       count: reports.filter(r => r.kategori === 'Jembatan Retak').length || 120,
       sla: '< 12 Jam',
       color: 'bg-orange-500'
@@ -269,7 +286,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       title: 'Trotoar Rusak',
       categoryValue: 'Trotoar Rusak',
       desc: 'Paving ambles & ubin difabel pecah',
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
+      image: categoryImages['Trotoar Rusak'] || DEFAULT_CATEGORY_IMAGES['Trotoar Rusak'],
       count: reports.filter(r => r.kategori === 'Trotoar Rusak').length || 210,
       sla: '< 48 Jam',
       color: 'bg-amber-500'
@@ -278,7 +295,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       title: 'Lampu Jalan Mati',
       categoryValue: 'Lampu Jalan Mati',
       desc: 'PJU padam & kabel penerangan terbuka',
-      image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+      image: categoryImages['Lampu Jalan Mati'] || DEFAULT_CATEGORY_IMAGES['Lampu Jalan Mati'],
       count: reports.filter(r => r.kategori === 'Lampu Jalan Mati').length || 340,
       sla: '< 24 Jam',
       color: 'bg-yellow-500'
@@ -287,7 +304,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       title: 'Saluran Air',
       categoryValue: 'Saluran Air Tersumbat',
       desc: 'Drainase tersumbat lumpur & meluap',
-      image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80',
+      image: categoryImages['Saluran Air Tersumbat'] || DEFAULT_CATEGORY_IMAGES['Saluran Air Tersumbat'],
       count: reports.filter(r => r.kategori === 'Saluran Air Tersumbat').length || 95,
       sla: '< 48 Jam',
       color: 'bg-blue-500'
@@ -296,7 +313,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       title: 'Fasilitas Publik',
       categoryValue: 'Fasilitas Publik Lainnya',
       desc: 'Halte bus, taman kota & marka jalan',
-      image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80',
+      image: categoryImages['Fasilitas Publik Lainnya'] || DEFAULT_CATEGORY_IMAGES['Fasilitas Publik Lainnya'],
       count: reports.filter(r => r.kategori === 'Fasilitas Publik Lainnya').length || 60,
       sla: '< 72 Jam',
       color: 'bg-purple-500'
@@ -539,23 +556,52 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Right: Category Cards */}
             <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-bold text-gray-900">Kategori Kerusakan</h2>
-                <button
-                  onClick={onOpenReportModal}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                >
-                  + Buat Laporan Baru
-                </button>
+              <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-xl font-bold text-gray-900">Kategori Kerusakan</h2>
+                  {isSuperAdmin && (
+                    <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 rounded-full px-2 py-0.5">
+                      <Crown className="h-2.5 w-2.5 text-amber-600" />
+                      Super Admin Mode
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isSuperAdmin && (
+                    <button
+                      type="button"
+                      id="edit-category-photos-superadmin-btn"
+                      onClick={() => {
+                        setSelectedEditCategory(undefined);
+                        setIsCategoryModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs active:scale-95 transition-all"
+                      title="Super Admin: Kelola dan ganti foto semua kategori"
+                    >
+                      <Crown className="h-3.5 w-3.5 text-amber-100" />
+                      <span>Edit Foto Kategori</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={onOpenReportModal}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    + Buat Laporan Baru
+                  </button>
+                </div>
               </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {categories.map((cat) => (
-                  <button
+                  <div
                     key={cat.title}
-                    onClick={() => onNavigateToList(cat.categoryValue || cat.title)}
-                    className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 transition-all text-left cursor-pointer"
+                    className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 transition-all text-left flex flex-col"
                   >
-                    <div className="aspect-video relative overflow-hidden">
+                    <div
+                      onClick={() => onNavigateToList(cat.categoryValue || cat.title)}
+                      className="aspect-video relative overflow-hidden cursor-pointer bg-gray-900"
+                    >
                       <img
                         src={cat.image}
                         alt={cat.title}
@@ -563,16 +609,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      
+                      {/* Super Admin Quick Edit Button */}
+                      {isSuperAdmin && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEditCategory(cat.categoryValue || cat.title);
+                            setIsCategoryModalOpen(true);
+                          }}
+                          className="absolute top-2 left-2 z-10 inline-flex items-center gap-1 rounded-full bg-black/75 hover:bg-black text-white px-2.5 py-1 text-[10px] font-bold shadow-md backdrop-blur-xs active:scale-95 transition-all"
+                          title={`Ganti foto untuk kategori ${cat.title}`}
+                        >
+                          <Crown className="h-3 w-3 text-amber-400" />
+                          <span>Ganti Foto</span>
+                        </button>
+                      )}
+
                       <span className={`absolute top-2 right-2 ${cat.color} text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full`}>
                         SLA {cat.sla}
                       </span>
                     </div>
-                    <div className="p-3">
-                      <p className="text-sm font-bold text-gray-900 leading-tight">{cat.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5 leading-snug">{cat.desc}</p>
-                      <p className="text-xs font-semibold text-blue-600 mt-1.5">{cat.count}+ laporan</p>
+
+                    <div
+                      onClick={() => onNavigateToList(cat.categoryValue || cat.title)}
+                      className="p-3 flex-1 flex flex-col justify-between cursor-pointer"
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-gray-900 leading-tight">{cat.title}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 leading-snug">{cat.desc}</p>
+                      </div>
+                      <p className="text-xs font-semibold text-blue-600 mt-2">{cat.count}+ laporan</p>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -690,6 +760,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Super Admin Category Photo Edit Modal */}
+      {isSuperAdmin && (
+        <CategoryPhotoEditModal
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          initialCategory={selectedEditCategory}
+          currentImages={categoryImages}
+          onSaved={(updated) => {
+            setCategoryImages(updated);
+          }}
+        />
+      )}
 
     </div>
   );

@@ -923,6 +923,46 @@ app.post('/api/reports/reset', (req, res) => {
   res.json({ message: 'Database laporan berhasil di-reset ke data demo awal', count: reportsDatabase.length });
 });
 
+// Category Images Store & Endpoints (Super Admin)
+const DEFAULT_CATEGORY_IMAGES_STORE: Record<string, string> = {
+  'Jalan Berlubang': 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+  'Jembatan Retak': 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=80',
+  'Trotoar Rusak': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
+  'Lampu Jalan Mati': 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+  'Saluran Air Tersumbat': 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80',
+  'Fasilitas Publik Lainnya': 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80',
+};
+
+let categoryImagesDatabase: Record<string, string> = { ...DEFAULT_CATEGORY_IMAGES_STORE };
+
+// 11. Super Admin: Get Category Images
+app.get('/api/categories/images', (req, res) => {
+  res.json({ images: categoryImagesDatabase });
+});
+
+// 12. Super Admin: Update Category Image(s)
+app.put('/api/categories/images', (req, res) => {
+  const { category, imageUrl, images } = req.body;
+  if (images && typeof images === 'object') {
+    categoryImagesDatabase = { ...categoryImagesDatabase, ...images };
+  } else if (category && imageUrl) {
+    categoryImagesDatabase[category] = imageUrl;
+  }
+  res.json({
+    message: 'Foto kategori berhasil diperbarui oleh Super Admin',
+    images: categoryImagesDatabase,
+  });
+});
+
+// 13. Super Admin: Reset Category Images
+app.post('/api/categories/images/reset', (req, res) => {
+  categoryImagesDatabase = { ...DEFAULT_CATEGORY_IMAGES_STORE };
+  res.json({
+    message: 'Foto kategori berhasil dikembalikan ke bawaan',
+    images: categoryImagesDatabase,
+  });
+});
+
 // 9. Admin Statistics Overview
 app.get('/api/admin/stats', (req, res) => {
   const total = reportsDatabase.length;
