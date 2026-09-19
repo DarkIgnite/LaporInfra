@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* ===== TOP HEADER ===== */}
-      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm font-sans">
+      <header className="sticky top-0 z-40 w-full bg-white dark:bg-[#1a1b1e]/95 backdrop-blur-md border-b border-gray-200 dark:border-white/[0.08] shadow-xs font-sans">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 gap-4">
 
           {/* Left: Brand Logo */}
@@ -117,13 +117,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm group-hover:bg-amber-600 transition-colors">
               <MapPin className="h-4 w-4 fill-white stroke-white stroke-0" />
             </div>
-            <span className="font-black text-lg tracking-tight text-gray-900 leading-none">
-              Lapor<span className="text-amber-600">Infra</span>
+            <span className="font-black text-lg tracking-tight text-gray-900 dark:text-white leading-none">
+              Lapor<span className="text-amber-500">Infra</span>
             </span>
           </button>
 
           {/* Center: Navigation Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-full dark:bg-white/[0.04] dark:border dark:border-white/[0.08]">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
@@ -131,10 +131,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   key={item.id}
                   id={`nav-tab-${item.id}`}
                   onClick={() => onNavigate(item.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all border ${
                     isActive
                       ? 'nav-tab-active font-bold'
-                      : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100/70 dark:hover:bg-white/5'
+                      : 'border-transparent text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100/70 dark:hover:bg-white/[0.08]'
                   }`}
                 >
                   {item.icon}
@@ -146,14 +146,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Theme Toggle Button (Google Dark Grey) */}
+            {/* Theme Toggle Button */}
             <button
               id="theme-toggle-nav-btn"
               type="button"
               onClick={toggleTheme}
               title={isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Google Dark Mode (Dark Grey)'}
               aria-label="Toggle dark mode"
-              className="flex items-center justify-center h-9 w-9 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-700 transition-all shadow-xs active:scale-90"
+              className="flex items-center justify-center h-9 w-9 rounded-full border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.06] hover:bg-gray-100 dark:hover:bg-white/[0.12] text-gray-700 dark:text-stone-200 transition-all shadow-xs active:scale-90"
             >
               {isDark ? (
                 <Sun className="h-4 w-4 text-amber-400" />
@@ -178,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="google-login-nav-btn"
                 onClick={handleGoogleLogin}
                 disabled={isSigningIn}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50 px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors shadow-sm active:scale-95"
+                className="inline-flex items-center gap-2 rounded-full border border-gray-300 dark:border-white/[0.1] bg-white dark:bg-white/[0.06] hover:bg-gray-50 dark:hover:bg-white/[0.12] px-3.5 py-2 text-sm font-semibold text-gray-700 dark:text-stone-200 transition-colors shadow-sm active:scale-95"
               >
                 {/* Google G Icon */}
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
@@ -195,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="user-profile-menu-btn"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 pl-1 pr-3 py-1 transition-all shadow-sm"
+                  className="flex items-center gap-2 rounded-full border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-white/[0.06] hover:bg-gray-50 dark:hover:bg-white/[0.12] pl-1 pr-3 py-1 transition-all shadow-sm"
                 >
                   {user.photoURL ? (
                     <img
@@ -210,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   )}
                   <div className="hidden sm:flex items-center gap-1">
-                    <span className="text-sm font-semibold text-gray-800 max-w-[80px] truncate">
+                    <span className="text-sm font-semibold text-gray-800 dark:text-stone-200 max-w-[80px] truncate">
                       {user.displayName?.split(' ')[0] || 'Akun'}
                     </span>
                     {isSuperAdmin ? (

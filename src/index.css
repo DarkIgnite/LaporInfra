@@ -538,11 +538,14 @@ html.dark .google-incident-marker .text-slate-600 {
 .nav-tab-active {
   background-color: #fef3c7 !important;
   color: #b45309 !important;
+  border-color: #fde68a !important;
 }
 
 html.dark .nav-tab-active {
-  background-color: rgba(255, 255, 255, 0.09) !important;
+  background-color: rgba(245, 158, 11, 0.16) !important;
   color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.38) !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.18) !important;
 }
 
 
