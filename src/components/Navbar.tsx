@@ -88,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'beranda', label: 'Beranda' },
     { id: 'laporan', label: 'Laporan Publik' },
     { id: 'peta', label: 'Peta Radar' },
-    { id: 'asisten', label: 'Tanya AI', icon: <Sparkles className="h-3.5 w-3.5 text-blue-600" /> },
+    { id: 'asisten', label: 'Tanya AI', icon: <Sparkles className="h-3.5 w-3.5 text-amber-500" /> },
     ...(canAccessAdmin
       ? [{
           id: 'admin' as const,

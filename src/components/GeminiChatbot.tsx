@@ -297,15 +297,15 @@ export function GeminiChatbot({
 
   if (!isOpen) return null;
 
-  // ─── FLOATING MODE (original dark-header style, unchanged) ───────────────
+  // ─── FLOATING MODE (Clean White Mode & Amber Theme) ───────────────────────
   if (floating) {
     return (
       <div
         id="gemini-chatbot-container"
-        className="fixed bottom-20 right-4 sm:right-6 w-[94vw] sm:w-[460px] h-[640px] max-h-[82vh] z-50 animate-in fade-in zoom-in-95 duration-200 flex flex-col bg-white border border-stone-200/90 shadow-2xl rounded-2xl overflow-hidden"
+        className="fixed bottom-20 right-4 sm:right-6 w-[94vw] sm:w-[460px] h-[640px] max-h-[82vh] z-50 animate-in fade-in zoom-in-95 duration-200 flex flex-col bg-white border border-gray-200 shadow-2xl rounded-2xl overflow-hidden"
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 text-white px-4 py-3.5 border-b border-stone-700 flex flex-col gap-2.5 shrink-0">
+        {/* Header (Clean White Mode) */}
+        <div className="bg-white text-gray-900 px-4 py-3.5 border-b border-gray-100 flex flex-col gap-2.5 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/20">
@@ -313,14 +313,14 @@ export function GeminiChatbot({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-sm text-stone-100 flex items-center gap-1.5">
+                  <h3 className="font-bold text-sm text-gray-900 flex items-center gap-1.5">
                     <span>LaporInfra AI Assistant</span>
-                    <span className="inline-flex items-center rounded-full bg-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-400/30">
+                    <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200">
                       Live
                     </span>
                   </h3>
                 </div>
-                <p className="text-[11px] text-stone-400 leading-tight">
+                <p className="text-[11px] text-gray-500 leading-tight">
                   Konsultasi Kerusakan, Analisis PU &amp; Grounding Maps
                 </p>
               </div>
@@ -330,14 +330,14 @@ export function GeminiChatbot({
               <button
                 onClick={handleClearHistory}
                 title="Reset Percakapan"
-                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/80 transition-colors text-xs flex items-center gap-1"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-xs flex items-center gap-1"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/80 transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -349,17 +349,17 @@ export function GeminiChatbot({
           <div className="relative">
             <button
               onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-stone-800/90 hover:bg-stone-800 border border-stone-700/80 rounded-xl text-left text-xs transition-all text-stone-200 shadow-inner"
+              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left text-xs transition-all text-gray-800 shadow-2xs"
             >
               <div className="flex items-center gap-2 truncate">
-                <PresetIcon className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                <span className="font-bold text-stone-100 truncate">{currentPreset.shortTitle}</span>
-                <span className="text-[10px] text-stone-400 font-mono bg-stone-900/60 px-1.5 py-0.5 rounded border border-stone-700">
+                <PresetIcon className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                <span className="font-bold text-gray-900 truncate">{currentPreset.shortTitle}</span>
+                <span className="text-[10px] text-gray-500 font-mono bg-white px-1.5 py-0.5 rounded border border-gray-200">
                   {currentPreset.modelDisplay}
                 </span>
               </div>
               <ChevronDown
-                className={`h-3.5 w-3.5 text-stone-400 transition-transform ${
+                className={`h-3.5 w-3.5 text-gray-400 transition-transform ${
                   isRoleDropdownOpen ? 'rotate-180' : ''
                 }`}
               />
@@ -371,7 +371,7 @@ export function GeminiChatbot({
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
-                  className="absolute top-full left-0 right-0 mt-1 bg-stone-900 border border-stone-700 rounded-xl shadow-xl z-30 overflow-hidden py-1 divide-y divide-stone-800"
+                  className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-30 overflow-hidden py-1 divide-y divide-gray-100"
                 >
                   {(Object.keys(ROLE_PRESETS) as ChatRoleMode[]).map((mode) => {
                     const preset = ROLE_PRESETS[mode];
@@ -382,23 +382,23 @@ export function GeminiChatbot({
                       <button
                         key={mode}
                         onClick={() => handleRoleChange(mode)}
-                        className={`w-full px-3 py-2 text-left text-xs flex items-start gap-2.5 hover:bg-stone-800 transition-colors ${
-                          isSelected ? 'bg-amber-500/10 text-amber-300' : 'text-stone-300'
+                        className={`w-full px-3 py-2 text-left text-xs flex items-start gap-2.5 hover:bg-gray-50 transition-colors ${
+                          isSelected ? 'bg-amber-50 text-amber-900 font-semibold' : 'text-gray-700'
                         }`}
                       >
                         <ModeIcon
                           className={`h-4 w-4 mt-0.5 shrink-0 ${
-                            isSelected ? 'text-amber-400' : 'text-stone-400'
+                            isSelected ? 'text-amber-600' : 'text-gray-400'
                           }`}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <span className="font-bold">{preset.shortTitle}</span>
-                            <span className="text-[9px] font-mono text-stone-400 bg-stone-800 px-1 rounded">
+                            <span className="text-[9px] font-mono text-gray-500 bg-gray-100 px-1 rounded">
                               {preset.modelDisplay}
                             </span>
                           </div>
-                          <p className="text-[10px] text-stone-400 truncate mt-0.5">
+                          <p className="text-[10px] text-gray-400 truncate mt-0.5">
                             {preset.description}
                           </p>
                         </div>
@@ -596,8 +596,8 @@ export function GeminiChatbot({
 
         {/* Suggested Prompt Chips */}
         {messages.length <= 2 && (
-          <div className="px-4 py-2 bg-stone-100/80 border-t border-stone-200/70 shrink-0">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-stone-500 mb-1.5">
+          <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 shrink-0">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 mb-1.5">
               <Sparkles className="h-3 w-3 text-amber-500" />
               <span>Saran Pertanyaan Cepat:</span>
             </div>
@@ -606,7 +606,7 @@ export function GeminiChatbot({
                 <button
                   key={idx}
                   onClick={() => handleSendMessage(prompt)}
-                  className="text-left text-[11px] px-2.5 py-1 rounded-lg bg-white hover:bg-amber-50 text-stone-700 hover:text-amber-800 border border-stone-200 hover:border-amber-300 transition-colors shadow-2xs leading-snug"
+                  className="text-left text-[11px] px-2.5 py-1 rounded-lg bg-white hover:bg-amber-50 text-gray-700 hover:text-amber-800 border border-gray-200 hover:border-amber-300 transition-colors shadow-2xs leading-snug"
                 >
                   {prompt}
                 </button>

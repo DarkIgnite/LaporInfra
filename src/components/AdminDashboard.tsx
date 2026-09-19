@@ -200,42 +200,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   return (
     <div className="min-h-screen bg-[#fafaf9] py-8 px-4 sm:px-6 lg:px-8 space-y-6 font-sans">
       <div className="mx-auto max-w-[1360px] space-y-6">
-        {/* Admin Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-stone-800">
+        {/* Admin Header - Clean White Mode */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white text-gray-900 p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${isSuperAdmin ? 'bg-gradient-to-tr from-amber-500 to-orange-500' : 'bg-amber-600'} text-white shadow-md`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${isSuperAdmin ? 'bg-gradient-to-tr from-amber-500 to-orange-500' : 'bg-amber-500'} text-white shadow-sm shadow-amber-500/20`}>
                 {isSuperAdmin ? <Crown className="h-5 w-5 text-white" /> : <Building2 className="h-5 w-5 stroke-[2.2]" />}
               </div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight">
-                {isSuperAdmin ? 'Dashboard Pengendali Super Admin' : 'Dashboard Dinas Pekerjaan Umum & Tata Ruang'}
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900">
+                {isSuperAdmin ? 'Dashboard Pengendali Super Admin' : 'Dashboard Dinas PU & Tata Ruang'}
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-stone-300">
-              Pengelola: <span className="font-bold text-amber-400">{userProfile?.displayName || adminUser.name}</span> &bull; {isSuperAdmin ? 'Kementerian PUPR / Super Administrator' : `${adminUser.department} (${adminUser.role})`}
+            <p className="text-xs sm:text-sm text-gray-500">
+              Pengelola: <span className="font-bold text-gray-900">{userProfile?.displayName || adminUser.name}</span> &bull; {isSuperAdmin ? 'Kementerian PUPR / Super Administrator' : `${adminUser.department} (${adminUser.role})`}
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {isSuperAdmin && (
               <button
                 type="button"
                 id="dashboard-edit-category-photos-btn"
                 onClick={() => setIsCategoryModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all active:scale-95"
                 title="Super Admin: Kelola dan ganti foto kategori beranda"
               >
                 <Crown className="h-3.5 w-3.5 text-amber-100" />
-                <span>Foto Kategori Beranda</span>
+                <span>Foto Kategori</span>
               </button>
             )}
 
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 rounded-full bg-stone-800 px-4 py-2 text-xs font-bold text-stone-200 border border-stone-700 hover:bg-stone-700 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors shadow-2xs"
             >
-              <Download className="h-3.5 w-3.5 text-amber-400" />
-              <span>Ekspor Rekap (CSV)</span>
+              <Download className="h-3.5 w-3.5 text-amber-600" />
+              <span>Ekspor CSV</span>
             </button>
 
             <button
@@ -246,181 +246,138 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 }
               }}
               title="Reset Demo Data"
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3.5 py-2 text-xs font-bold transition-colors shadow-2xs"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              <span>Reset Demo</span>
+              <span>Reset Data</span>
             </button>
           </div>
         </div>
 
         {/* Top 4 KPI Summary Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {/* Card 1: Total Reports */}
-          <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-2xs flex items-center justify-between">
+          <div className="rounded-xl border border-gray-200/90 bg-white p-4 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
-                Total Laporan Masuk
+              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                Total Laporan
               </p>
-              <h3 className="text-2xl font-black text-stone-900 mt-1">
+              <h3 className="text-2xl font-black text-gray-900 mt-0.5">
                 {stats.total}
               </h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">
-                Dari seluruh warga terlapor
+              <p className="text-[10px] text-gray-400 mt-0.5">
+                Semua warga
               </p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 text-stone-700">
-              <Layers className="h-6 w-6" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <Layers className="h-5 w-5" />
             </div>
           </div>
 
           {/* Card 2: Urgent Severity (Berat) */}
-          <div className="rounded-3xl border border-rose-200 bg-rose-50/50 p-5 shadow-2xs flex items-center justify-between">
+          <div className="rounded-xl border border-red-200 bg-white p-4 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">
-                Prioritas Kritis (Berat)
+              <p className="text-[11px] font-semibold text-red-700 uppercase tracking-wider">
+                Kritis (Berat)
               </p>
-              <h3 className="text-2xl font-black text-rose-700 mt-1">
+              <h3 className="text-2xl font-black text-red-600 mt-0.5">
                 {stats.berat}
               </h3>
-              <p className="text-[11px] text-rose-600 mt-0.5 font-semibold">
-                SLA Penanganan &lt; 24 Jam
+              <p className="text-[10px] text-red-500 mt-0.5 font-semibold">
+                SLA &lt; 24 Jam
               </p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-700">
-              <AlertTriangle className="h-6 w-6" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
             </div>
           </div>
 
           {/* Card 3: In Progress (Diproses) */}
-          <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-5 shadow-2xs flex items-center justify-between">
+          <div className="rounded-xl border border-amber-200 bg-white p-4 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">
-                Sedang Dikerjakan
+              <p className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider">
+                Diproses
               </p>
-              <h3 className="text-2xl font-black text-amber-800 mt-1">
+              <h3 className="text-2xl font-black text-amber-700 mt-0.5">
                 {stats.diproses}
               </h3>
-              <p className="text-[11px] text-amber-700 mt-0.5">
-                Tim URC &amp; Material di Lapangan
+              <p className="text-[10px] text-amber-600 mt-0.5">
+                Tim di lapangan
               </p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-800">
-              <Wrench className="h-6 w-6" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+              <Wrench className="h-5 w-5" />
             </div>
           </div>
 
           {/* Card 4: Resolved (Selesai) */}
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-2xs flex items-center justify-between">
+          <div className="rounded-xl border border-emerald-200 bg-white p-4 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
-                Selesai Diperbaiki
+              <p className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">
+                Selesai
               </p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <h3 className="text-2xl font-black text-emerald-800">
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <h3 className="text-2xl font-black text-emerald-700">
                   {stats.selesai}
                 </h3>
-                <span className="text-xs font-bold text-emerald-700">
+                <span className="text-[11px] font-bold text-emerald-600">
                   ({stats.resolutionRate}%)
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-700 mt-0.5">
-                Target SDG 9 Tercapai
+              <p className="text-[10px] text-emerald-600 mt-0.5">
+                SDG 9 tercapai
               </p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-              <CheckCircle2 className="h-6 w-6" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <CheckCircle2 className="h-5 w-5" />
             </div>
           </div>
         </div>
 
-        {/* Analytics Breakdown Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Severity Breakdown Bar */}
-          <div className="rounded-3xl border border-stone-200/80 bg-white p-6 space-y-4 shadow-2xs">
-            <h4 className="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+        {/* Analytics Breakdown Row - Compact & Not Crowded */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-xs space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+            <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4 text-amber-600" />
-              <span>Distribusi Tingkat Keparahan</span>
+              <span>Distribusi Status &amp; Kategori Kerusakan</span>
             </h4>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <div className="flex justify-between font-semibold text-stone-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-rose-600"></span>
-                    <span>Tingkat Berat (Bahaya Kritis)</span>
-                  </span>
-                  <span>{stats.berat} ({stats.total > 0 ? Math.round((stats.berat / stats.total) * 100) : 0}%)</span>
-                </div>
-                <div className="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-rose-600 h-full rounded-full"
-                    style={{ width: `${stats.total > 0 ? (stats.berat / stats.total) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between font-semibold text-stone-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-                    <span>Tingkat Sedang (Aksesibilitas)</span>
-                  </span>
-                  <span>{stats.sedang} ({stats.total > 0 ? Math.round((stats.sedang / stats.total) * 100) : 0}%)</span>
-                </div>
-                <div className="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-amber-500 h-full rounded-full"
-                    style={{ width: `${stats.total > 0 ? (stats.sedang / stats.total) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between font-semibold text-stone-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
-                    <span>Tingkat Ringan (Pemeliharaan)</span>
-                  </span>
-                  <span>{stats.ringan} ({stats.total > 0 ? Math.round((stats.ringan / stats.total) * 100) : 0}%)</span>
-                </div>
-                <div className="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-emerald-600 h-full rounded-full"
-                    style={{ width: `${stats.total > 0 ? (stats.ringan / stats.total) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
+            {/* Horizontal Severity Pills */}
+            <div className="flex items-center gap-3 text-xs font-semibold">
+              <span className="flex items-center gap-1 text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full text-[11px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                Berat: {stats.berat} ({stats.total > 0 ? Math.round((stats.berat / stats.total) * 100) : 0}%)
+              </span>
+              <span className="flex items-center gap-1 text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full text-[11px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Sedang: {stats.sedang} ({stats.total > 0 ? Math.round((stats.sedang / stats.total) * 100) : 0}%)
+              </span>
+              <span className="flex items-center gap-1 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-[11px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Ringan: {stats.ringan} ({stats.total > 0 ? Math.round((stats.ringan / stats.total) * 100) : 0}%)
+              </span>
             </div>
           </div>
 
-          {/* Category Breakdown (2 cols) */}
-          <div className="lg:col-span-2 rounded-3xl border border-stone-200/80 bg-white p-6 space-y-4 shadow-2xs">
-            <h4 className="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
-              <Layers className="h-4 w-4 text-amber-600" />
-              <span>Rekap per Kategori Fasilitas Publik</span>
-            </h4>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[
-                { name: 'Jalan Berlubang', count: stats.catMap['Jalan Berlubang'] || 0, color: 'bg-stone-50 text-stone-800 border-stone-200' },
-                { name: 'Jembatan Retak', count: stats.catMap['Jembatan Retak'] || 0, color: 'bg-rose-50 text-rose-800 border-rose-200' },
-                { name: 'Trotoar Rusak', count: stats.catMap['Trotoar Rusak'] || 0, color: 'bg-amber-50 text-amber-900 border-amber-200' },
-                { name: 'Lampu Jalan Mati', count: stats.catMap['Lampu Jalan Mati'] || 0, color: 'bg-stone-50 text-stone-800 border-stone-200' },
-                { name: 'Saluran Air Tersumbat', count: stats.catMap['Saluran Air Tersumbat'] || 0, color: 'bg-cyan-50 text-cyan-800 border-cyan-200' },
-                { name: 'Fasilitas Lainnya', count: stats.catMap['Fasilitas Publik Lainnya'] || 0, color: 'bg-stone-50 text-stone-700 border-stone-200' },
-              ].map((cat) => (
-                <div key={cat.name} className={`p-3.5 rounded-2xl border ${cat.color} space-y-1`}>
-                  <p className="text-[11px] font-medium truncate">{cat.name}</p>
-                  <p className="text-xl font-black">{cat.count}</p>
-                </div>
-              ))}
-            </div>
+          {/* Compact Category Chips */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            {[
+              { name: 'Jalan Berlubang', count: stats.catMap['Jalan Berlubang'] || 0 },
+              { name: 'Jembatan Retak', count: stats.catMap['Jembatan Retak'] || 0 },
+              { name: 'Trotoar Rusak', count: stats.catMap['Trotoar Rusak'] || 0 },
+              { name: 'Lampu Jalan Mati', count: stats.catMap['Lampu Jalan Mati'] || 0 },
+              { name: 'Saluran Air Tersumbat', count: stats.catMap['Saluran Air Tersumbat'] || 0 },
+              { name: 'Fasilitas Lainnya', count: stats.catMap['Fasilitas Publik Lainnya'] || 0 },
+            ].map((cat) => (
+              <div key={cat.name} className="p-2 rounded-xl border border-gray-200/80 bg-gray-50/60 flex items-center justify-between gap-1.5 text-xs">
+                <span className="text-[11px] font-medium text-gray-700 truncate">{cat.name}</span>
+                <span className="text-[11px] font-bold text-gray-900 bg-white px-1.5 py-0.5 rounded border border-gray-200 shrink-0">{cat.count}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Interactive Reports Table Card */}
-        <div className="rounded-3xl border border-stone-200/80 bg-white shadow-2xs overflow-hidden">
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-xs overflow-hidden">
           {/* Table Control & Filter Bar */}
           <div className="p-5 sm:p-6 border-b border-stone-200/80 space-y-3 bg-stone-50/60">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -588,9 +545,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <button
                             onClick={() => handleOpenStatusEdit(report)}
                             title="Perbarui Status Dinas"
-                            className="inline-flex items-center gap-1 rounded-full bg-stone-900 hover:bg-stone-800 px-3.5 py-1.5 text-xs font-bold text-white transition-colors"
+                            className="inline-flex items-center gap-1 rounded-full bg-amber-500 hover:bg-amber-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs shadow-amber-500/20 transition-all"
                           >
-                            <Edit3 className="h-3.5 w-3.5 text-amber-400" />
+                            <Edit3 className="h-3.5 w-3.5 text-amber-100" />
                             <span>Ubah Status</span>
                           </button>
                           {isSuperAdmin && (
@@ -616,20 +573,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Quick Status Update Modal */}
       {editingReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl border border-stone-200">
-            <div className="border-b border-stone-200 px-6 py-4 bg-stone-50 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl border border-gray-200">
+            <div className="border-b border-gray-100 px-6 py-4 bg-gray-50 flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-stone-900">
+                <h4 className="text-sm font-bold text-gray-900">
                   Ubah Status Penanganan Dinas
                 </h4>
-                <p className="text-xs text-stone-500 font-mono">
+                <p className="text-xs text-gray-500 font-mono">
                   {editingReport.ticketNumber} — {editingReport.kategori}
                 </p>
               </div>
               <button
                 onClick={() => setEditingReport(null)}
-                className="text-stone-400 hover:text-stone-700 text-lg font-bold"
+                className="text-gray-400 hover:text-gray-700 text-lg font-bold"
               >
                 &times;
               </button>
@@ -637,7 +594,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <form onSubmit={handleSaveStatus} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-stone-800 mb-1.5">
+                <label className="block text-xs font-bold text-gray-800 mb-1.5">
                   Pilih Status Baru
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -649,7 +606,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                         newStatus === st
                           ? 'border-amber-500 bg-amber-50 text-amber-900 shadow-xs ring-2 ring-amber-500/20'
-                          : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                       }`}
                     >
                       {st}
@@ -659,7 +616,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-stone-800 mb-1.5">
+                <label className="block text-xs font-bold text-gray-800 mb-1.5">
                   Catatan Tindak Lanjut Dinas (Publik &amp; Transparan)
                 </label>
                 <textarea
@@ -667,7 +624,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   value={dinasNoteInput}
                   onChange={(e) => setDinasNoteInput(e.target.value)}
                   placeholder="Contoh: Material aspal hotmix dan tim URC telah diberangkatkan ke lokasi..."
-                  className="w-full rounded-xl border border-stone-200 px-3 py-2 text-xs text-stone-800 focus:border-amber-500 focus:outline-hidden"
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:border-amber-500 focus:outline-hidden"
                 />
               </div>
 
@@ -675,14 +632,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingReport(null)}
-                  className="rounded-full border border-stone-200 px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-100"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="rounded-full bg-stone-900 px-5 py-2 text-xs font-bold text-white hover:bg-stone-800 shadow-md"
+                  className="rounded-full bg-amber-500 hover:bg-amber-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition-all"
                 >
                   {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>

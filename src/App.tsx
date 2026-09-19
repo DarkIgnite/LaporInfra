@@ -275,14 +275,14 @@ export default function App() {
             <button
               id="floating-chat-toggle-btn"
               onClick={() => setIsFloatingChatOpen(true)}
-              className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xl hover:scale-105 active:scale-95 transition-all group"
+              className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xl shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all group"
             >
               <Sparkles className="h-4 w-4" />
               <span className="hidden sm:inline">Tanya Asisten AI</span>
               <span className="sm:hidden">AI</span>
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-300 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-200"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-200"></span>
               </span>
             </button>
           )}
@@ -303,17 +303,17 @@ export default function App() {
         <footer className="border-t border-gray-200 bg-white py-6 px-4 sm:px-6 lg:px-8 text-xs text-gray-500 mb-16 md:mb-0">
           <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-black text-[10px]">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500 text-white font-black text-[10px]">
                 LI
               </div>
-              <span className="font-bold text-gray-800">LaporInfra</span>
+              <span className="font-bold text-gray-800">Lapor<span className="text-amber-600">Infra</span></span>
               <span className="hidden sm:inline text-gray-400">— Platform Pelaporan Kerusakan Infrastruktur Berbasis Foto & AI Vision</span>
             </div>
 
             <div className="flex items-center gap-4 text-[11px]">
               <button
                 onClick={() => setIsSDGModalOpen(true)}
-                className="font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                className="font-semibold text-amber-700 hover:text-amber-800 transition-colors flex items-center gap-1"
               >
                 <span>SDG 9: Industri, Inovasi & Infrastruktur</span>
               </button>

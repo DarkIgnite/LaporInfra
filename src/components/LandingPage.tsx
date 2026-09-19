@@ -169,18 +169,18 @@ const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMa
   );
 };
 
-// --- Stat Card ---
+// --- Stat Card (Minimalist & Sleek) ---
 const StatCard: React.FC<{ icon: React.ReactNode; value: string; label: string; color: string }> = ({
   icon, value, label, color
 }) => (
-  <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 px-4 py-3 shadow-sm">
-    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${color} shrink-0`}>
-      {icon}
+  <div className="group relative bg-white rounded-xl border border-gray-200/90 p-3 hover:border-amber-400 hover:shadow-xs transition-all flex flex-col justify-between">
+    <div className="flex items-center justify-between gap-1.5 mb-1.5">
+      <span className="text-[11px] font-semibold text-gray-500 truncate">{label}</span>
+      <div className={`flex h-6 w-6 items-center justify-center rounded-lg ${color} shrink-0 group-hover:scale-105 transition-transform`}>
+        {icon}
+      </div>
     </div>
-    <div>
-      <div className="text-lg font-black text-gray-900 leading-none">{value}</div>
-      <div className="text-xs text-gray-500 mt-0.5">{label}</div>
-    </div>
+    <div className="text-xl font-black text-gray-900 tracking-tight leading-none">{value}</div>
   </div>
 );
 
