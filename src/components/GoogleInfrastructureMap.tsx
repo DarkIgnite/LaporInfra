@@ -10,6 +10,7 @@ import {
 import { InfrastructureReport } from '../types';
 import { getSeverityStyle } from '../utils/helpers';
 import { UserLocationData } from '../utils/locationService';
+import { useTheme } from '../context/ThemeContext';
 
 interface GoogleInfrastructureMapProps {
   reports: InfrastructureReport[];
@@ -45,9 +46,11 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
     return { lat: -6.2088, lng: 106.8456 }; // Jakarta default
   }, [userLocation, reports]);
 
+  const { isDark } = useTheme();
   const leafletContainerRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<L.Map | null>(null);
   const leafletMarkersRef = useRef<L.LayerGroup | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const userCircleRef = useRef<L.Circle | null>(null);
   const lastLocationRef = useRef<{ lat: number; lng: number } | null>(null);
@@ -64,11 +67,17 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
         attributionControl: false
       });
 
-      // Clean OpenStreetMap standard tiles (fast, high clarity, no watermark)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      const initialTileUrl = isDark
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+      const initialLayer = L.tileLayer(initialTileUrl, {
         maxZoom: 19,
+        subdomains: 'abcd',
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
+
+      tileLayerRef.current = initialLayer;
 
       if (onMapClick) {
         map.on('click', (e) => {
@@ -79,7 +88,27 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
       leafletMapRef.current = map;
       leafletMarkersRef.current = L.layerGroup().addTo(map);
     }
-  }, [defaultCenter, onMapClick]);
+  }, [defaultCenter, onMapClick, isDark]);
+
+  // Dynamically update tile layer when theme changes
+  useEffect(() => {
+    if (!leafletMapRef.current) return;
+    const map = leafletMapRef.current;
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+    }
+    const tileUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+    const newLayer = L.tileLayer(tileUrl, {
+      maxZoom: 19,
+      subdomains: 'abcd',
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    tileLayerRef.current = newLayer;
+  }, [isDark]);
 
   // Update User Location Marker and Radar
   useEffect(() => {

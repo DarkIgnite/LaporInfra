@@ -40,6 +40,7 @@ import {
   UserLocationData,
   getReadableAddress
 } from '../utils/locationService';
+import { useTheme } from '../context/ThemeContext';
 
 type MapTileStyle = 'standard' | 'dark' | 'light' | 'satellite';
 
@@ -91,13 +92,20 @@ export const InteractiveLandingMap: React.FC<InteractiveLandingMapProps> = ({
   const [selectedSeverity, setSelectedSeverity] = useState<string>(initialSeverity);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const { isDark } = useTheme();
+
   // Map & Location States
-  const [mapStyle, setMapStyle] = useState<MapTileStyle>('standard');
+  const [mapStyle, setMapStyle] = useState<MapTileStyle>(() => (isDark ? 'dark' : 'standard'));
   const [userLocation, setUserLocation] = useState<UserLocationData | null>(null);
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [activeReport, setActiveReport] = useState<InfrastructureReport | null>(null);
   const [locationToast, setLocationToast] = useState<string | null>(null);
   const [showIncidentList, setShowIncidentList] = useState<boolean>(true);
+
+  // Synchronize map tile style when theme changes
+  useEffect(() => {
+    setMapStyle(isDark ? 'dark' : 'standard');
+  }, [isDark]);
 
   // Leaflet refs
   const mapContainerRef = useRef<HTMLDivElement | null>(null);

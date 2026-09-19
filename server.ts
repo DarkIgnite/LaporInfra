@@ -13,21 +13,50 @@ const PORT = 3000;
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
+import {
+  generateIntelligentChatResponse,
+  generateIntelligentDamageAnalysis,
+  InfrastructureReportData,
+} from './server/aiEngine';
+
+function getGeminiApiKey(customKey?: string): string | null {
+  if (customKey && typeof customKey === 'string' && customKey.trim().length > 0) {
+    return customKey.trim();
+  }
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0) {
+    return process.env.GEMINI_API_KEY.trim();
+  }
+  try {
+    const fs = require('fs');
+    if (fs.existsSync('/app/.dev.env.json')) {
+      const devEnv = JSON.parse(fs.readFileSync('/app/.dev.env.json', 'utf8'));
+      if (devEnv.GEMINI_API_KEY && typeof devEnv.GEMINI_API_KEY === 'string') {
+        return devEnv.GEMINI_API_KEY.trim();
+      }
+    }
+  } catch (_) {}
+  return process.env.API_KEY || null;
+}
+
 // Initialize Gemini SDK lazily
-function getGeminiClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyCRS2cscEdc6M7lurTN4In9u0LNt54-37g';
-  if (!apiKey) {
-    console.warn('GEMINI_API_KEY is not set. AI analysis will use intelligent fallback.');
+function getGeminiClient(customKey?: string): GoogleGenAI | null {
+  const apiKey = getGeminiApiKey(customKey);
+  if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length === 0) {
     return null;
   }
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
+  try {
+    return new GoogleGenAI({
+      apiKey: apiKey.trim(),
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
       },
-    },
-  });
+    });
+  } catch (e) {
+    console.warn('GoogleGenAI initialization error:', e);
+    return null;
+  }
 }
 
 // In-Memory Database store with initial rich seed data
@@ -283,7 +312,8 @@ app.get('/api/health', (req, res) => {
 // 2. AI Vision Damage Analysis with Gemini
 app.post('/api/gemini/analyze-damage', async (req, res) => {
   try {
-    const { imageBase64, mimeType = 'image/jpeg', imageUrl, manualHint } = req.body;
+    const imageBase64 = req.body.imageBase64 || req.body.image;
+    const { mimeType = 'image/jpeg', imageUrl, manualHint } = req.body;
 
     let base64Data = imageBase64;
     let actualMime = mimeType;
@@ -319,55 +349,15 @@ app.post('/api/gemini/analyze-damage', async (req, res) => {
 
     const ai = getGeminiClient();
 
-    // Helper for intelligent heuristic fallback
-    const createHeuristicFallback = (reason?: string) => {
-      const hint = (manualHint || '').toLowerCase();
-      let kategori = 'Jalan Berlubang';
-      let keparahan: 'Ringan' | 'Sedang' | 'Berat' = 'Sedang';
-      let deskripsi = 'Terdeteksi indikasi kerusakan permukaan jalan dan aspal yang membutuhkan perbaikan.';
-      let prioritas = 'Prioritas Penanganan Standar (Dinas Bina Marga). Menunggu verifikasi tim lapangan.';
-      let skor = 6.0;
-
-      if (hint.includes('lampu') || hint.includes('pju') || hint.includes('gelap')) {
-        kategori = 'Lampu Jalan Mati';
-        deskripsi = 'Penerangan Jalan Umum (PJU) padam atau mengalami gangguan kelistrikan.';
-        prioritas = 'Prioritas Sedang. Mengurangi risiko kriminalitas dan kecelakaan saat malam hari.';
-        skor = 6.5;
-      } else if (hint.includes('jembatan') || hint.includes('retak')) {
-        kategori = 'Jembatan Retak';
-        keparahan = 'Berat';
-        deskripsi = 'Retakan fisik pada struktur pondasi atau dinding penopang jembatan.';
-        prioritas = 'Prioritas Tinggi (Level 1). Diperlukan inspeksi visual dan struktural mendesak.';
-        skor = 8.5;
-      } else if (hint.includes('trotoar') || hint.includes('paving') || hint.includes('pedestrian')) {
-        kategori = 'Trotoar Rusak';
-        deskripsi = 'Kerusakan paving block atau jalur pedestrian yang mengganggu aksesibilitas pejalan kaki.';
-        prioritas = 'Prioritas Sedang. Perbaikan jalur pedestrian dan ubin pemandu.';
-        skor = 5.5;
-      } else if (hint.includes('banjir') || hint.includes('drainase') || hint.includes('got') || hint.includes('saluran')) {
-        kategori = 'Saluran Air Tersumbat';
-        keparahan = 'Berat';
-        deskripsi = 'Endapan sedimen atau sumbatan pada gorong-gorong drainase pembuangan air.';
-        prioritas = 'Prioritas Tinggi menjelang musim hujan guna mencegah genangan air meluap.';
-        skor = 7.5;
-      }
-
-      return {
-        kategori,
-        tingkat_keparahan: keparahan,
-        deskripsi_otomatis: deskripsi,
-        rekomendasi_prioritas: prioritas,
-        is_valid_infrastructure: true,
-        perkiraan_bahaya: 'Potensi gangguan kenyamanan dan keselamatan pengguna fasilitas umum.',
-        skor_keparahan: skor,
-        is_fallback: true,
-        fallback_notice: reason || 'Analisis awal estimasi aktif (server AI sedang sibuk).'
-      };
-    };
-
     if (!ai) {
-      console.log('Using simulated Gemini analysis heuristic (no API key)');
-      return res.json(createHeuristicFallback());
+      console.log('Using intelligent LaporInfra visual analysis engine');
+      return res.json(
+        generateIntelligentDamageAnalysis({
+          imageBase64: base64Data,
+          mimeType: actualMime,
+          manualHint,
+        })
+      );
     }
 
     const promptText = `Anda adalah asisten AI inspeksi infrastruktur publik dan sipil (Dinas Bina Marga & Cipta Karya) untuk sistem LaporInfra (mendukung SDG 9: Ketahanan Infrastruktur & Inovasi Berkelanjutan).
@@ -399,7 +389,8 @@ Jika MERUPAKAN infrastruktur publik, klasifikasikan:
 
     // Multi-tier model fallback list to handle high demand (503 / 429) gracefully
     const candidateModels = [
-      'gemini-3.7-flash',
+      'gemini-3.6-flash',
+      'gemini-3.8-flash',
       'gemini-flash-latest',
       'gemini-3.1-flash-lite'
     ];
@@ -502,21 +493,25 @@ Jika MERUPAKAN infrastruktur publik, klasifikasikan:
       }
     }
 
-    // If all remote models failed due to upstream 503 high demand or network limits,
-    // return resilient domain heuristic analysis so citizen reporting is never blocked
-    console.warn('All Gemini candidate models failed, providing resilient heuristic fallback:', lastError?.message);
-    return res.json(createHeuristicFallback('Analisis estimasi disajikan sementara karena lonjakan lalu lintas server AI.'));
+    // If all remote models failed due to upstream high demand or network limits,
+    // return resilient domain analysis so citizen reporting is never blocked
+    console.warn('All Gemini candidate models failed, providing intelligent fallback:', lastError?.message);
+    return res.json(
+      generateIntelligentDamageAnalysis({
+        imageBase64: base64Data,
+        mimeType: actualMime,
+        manualHint,
+      })
+    );
   } catch (error: any) {
     console.error('Error in analyze-damage:', error);
-    return res.json({
-      kategori: 'Jalan Berlubang',
-      tingkat_keparahan: 'Sedang',
-      deskripsi_otomatis: 'Terdeteksi laporan kerusakan infrastruktur. Silakan periksa kembali kategori dan deskripsi.',
-      rekomendasi_prioritas: 'Menunggu peninjauan oleh verifikator dinas terkait.',
-      is_valid_infrastructure: true,
-      is_fallback: true,
-      fallback_notice: 'Mode cadangan aktif.'
-    });
+    return res.json(
+      generateIntelligentDamageAnalysis({
+        imageBase64: '',
+        mimeType: 'image/jpeg',
+        manualHint: req.body?.manualHint || '',
+      })
+    );
   }
 });
 
@@ -545,8 +540,26 @@ app.post('/api/gemini/chat', async (req, res) => {
     let systemInstruction = '';
     let isMapsTask = Boolean(enableMapsGrounding || roleMode === 'maps');
 
+    const liveReportsSummary = `
+
+[DATA REAL-TIME SISTEM LAPORINFRA]:
+Total Laporan di Database: ${reportsDatabase.length}
+Rekap Status Laporan:
+- Baru Masuk: ${reportsDatabase.filter((r) => r.status === 'Baru').length}
+- Sedang Diproses Dinas: ${reportsDatabase.filter((r) => r.status === 'Diproses').length}
+- Selesai Ditangani: ${reportsDatabase.filter((r) => r.status === 'Selesai').length}
+Daftar Tiket Laporan Terkini:
+${reportsDatabase.map((r) => `• [${r.ticketNumber}] ${r.kategori} (${r.tingkat_keparahan}) - ${r.location.address || ''}, ${r.location.city || ''} | Status: ${r.status} | Pelapor: ${r.reporterName || 'Warga'} | Masalah: ${r.deskripsi_otomatis || r.deskripsi_manual || '-'} | Catatan Dinas: ${r.dinasNotes || '-'}`).join('\n')}
+
+PANDUAN GAYA KOMUNIKASI PERCAKAPAN:
+- Berbicaralah selayaknya asisten AI percakapan modern pada umumnya (ramah, luwes, komunikatif, tidak kaku).
+- Untuk sapaan atau obrolan santai ("tes", "halo", "hai", "apa kabar", dsb.), balaslah secara hangat, natural, dan bersahabat layaknya ChatGPT atau Gemini.
+- Jawablah pertanyaan seputar infrastruktur, teknis jalan, drainase, lampu jalan, atau tiket dengan akurat merujuk ke data real-time LaporInfra di atas jika relevan.
+- Jika pengguna ingin melapor kerusakan baru, arahkan dengan ramah untuk menekan tombol "+ Lapor Kerusakan" di menu atas.
+`;
+
     if (roleMode === 'complex') {
-      candidateModels = ['gemini-3.1-pro-preview', 'gemini-2.5-flash', 'gemini-3.7-flash'];
+      candidateModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
       systemInstruction = `Anda adalah "Insinyur Sipil Senior & Analis Struktur PUPR" untuk platform LaporInfra (mendukung SDG 9: Infrastruktur Berkelanjutan).
 Keahlian Anda mencakup:
 - Rekayasa perkerasan jalan raya (Hotmix AC-WC, AC-BC, subgrade CBR, rigid pavement beton semen K-350).
@@ -556,24 +569,24 @@ Keahlian Anda mencakup:
 - Estimasi volume pekerjaan fisik & perkiraan anggaran biaya perbaikan (RAB/AHSP).
 - Metodologi mitigasi darurat dan perbaikan permanen bertahap.
 
-Berikan analisis yang mendalam, berwibawa, teknis, runtut, dan mudah dipahami dengan perhitungan estimasi praktis jika ditanyakan.`;
+Berikan analisis yang mendalam, berwibawa, teknis, runtut, dan mudah dipahami dengan perhitungan estimasi praktis jika ditanyakan.${liveReportsSummary}`;
     } else if (roleMode === 'fast') {
-      candidateModels = ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-flash-latest'];
+      candidateModels = ['gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
       systemInstruction = `Anda adalah "Bot Tanggap Kilat & FAQ LaporInfra".
 Tugas utama Anda:
 - Memberikan jawaban super ringkas, cepat, dan to-the-point (maksimal 3-4 kalimat atau poin-poin padat).
 - Menjawab alur lapor kerusakan jalan/fasilitas umum, nomor darurat dinas PU/Polantas/BPBD, dan kriteria tingkat urgensi (Level 1 Darurat <24 jam, Level 2 Sedang <7 hari, Level 3 Ringan).
-- Bersikap ramah, efisien, dan responsif.`;
+- Bersikap ramah, efisien, dan responsif.${liveReportsSummary}`;
     } else if (isMapsTask) {
-      candidateModels = ['gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
+      candidateModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
       systemInstruction = `Anda adalah "Navigator Fasilitas Infrastruktur & Tanggap Darurat PU" berbasis data Google Maps Platform.
 Tugas utama Anda:
 - Membantu warga dan petugas menemukan lokasi kantor Dinas Pekerjaan Umum, kantor Bina Marga, posko Unit Reaksi Cepat (URC), depo aspal/material konstruksi, kantor polisi lalu lintas, atau rumah sakit/fasilitas darurat terdekat di seluruh Indonesia.
 - Menyajikan nama tempat, estimasi jarak/aksesibilitas, dan panduan rute navigasi yang jelas.
-- Data grounding Google Maps akan otomatis dilampirkan sebagai tautan peta interaktif.`;
+- Data grounding Google Maps akan otomatis dilampirkan sebagai tautan peta interaktif.${liveReportsSummary}`;
     } else {
       // General Mode
-      candidateModels = ['gemini-2.5-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
+      candidateModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
       systemInstruction = `Anda adalah "LaporInfra Assistant", asisten AI ramah, cerdas, dan interaktif untuk sistem pelaporan kerusakan infrastruktur publik di Indonesia.
 Anda siap membantu warga mengenai:
 1. Cara mengambil foto dan melaporkan jalan berlubang, jembatan retak, trotoar rusak, lampu jalan mati, dan saluran tersumbat.
@@ -581,7 +594,7 @@ Anda siap membantu warga mengenai:
 3. Menjelaskan transparansi status laporan (Baru -> Diproses -> Selesai) dan peran masyarakat dalam mendukung SDG 9.
 4. Memberikan saran rute atau tindakan pencegahan kecelakaan.
 
-Gunakan Bahasa Indonesia yang sopan, solutif, komunikatif, dan terstruktur rapi (gunakan formatting Markdown tebal/poin untuk kemudahan membaca).`;
+Gunakan Bahasa Indonesia yang sopan, solutif, komunikatif, dan terstruktur rapi (gunakan formatting Markdown tebal/poin untuk kemudahan membaca).${liveReportsSummary}`;
     }
 
     // Format multi-turn conversation history for @google/genai SDK
@@ -611,16 +624,20 @@ Gunakan Bahasa Indonesia yang sopan, solutif, komunikatif, dan terstruktur rapi 
     }
 
     if (!ai) {
-      // Offline / No-API-key heuristic fallback response
-      const lastMsg = messages[messages.length - 1]?.text || '';
+      console.log('Using intelligent LaporInfra chat engine (no external API key needed)');
+      const fallbackResult = generateIntelligentChatResponse({
+        messages,
+        roleMode,
+        location,
+        reportsDatabase: reportsDatabase as any,
+      });
+
       return res.json({
-        text: `Halo! Saya adalah Asisten AI LaporInfra (Mode Edukasi & Demo). 
-
-Mengenai pertanyaan Anda: *"**${lastMsg.substring(0, 100)}**"*, Anda dapat membuat laporan kerusakan infrastruktur dengan tombol **+ Lapor Kerusakan** di bagian atas layar. Tim Dinas Pekerjaan Umum akan memverifikasi foto dan koordinat GPS secara berkala.
-
-Jika terjadi keadaan darurat di jalan raya (misal lubang dalam di lajur cepat atau tiang listrik roboh), segera hubungi Call Center Darurat PU / 112.`,
-        groundingChunks: [],
-        modelUsed: 'offline-demo',
+        text: fallbackResult.text,
+        groundingChunks: fallbackResult.groundingChunks,
+        groundingMetadata: null,
+        modelUsed: fallbackResult.modelUsed,
+        roleMode,
       });
     }
 
@@ -679,12 +696,16 @@ Jika terjadi keadaan darurat di jalan raya (misal lubang dalam di lajur cepat at
     }
 
     if (!responseText) {
-      console.warn('All candidate models failed in chat, providing resilient fallback:', lastChatError?.message);
-      responseText = `Mohon maaf, lalu lintas layanan AI saat ini sedang tinggi. Namun informasi penting untuk Anda:
-- Untuk melaporkan kerusakan baru: Buka tab **Lapor** dan unggah foto lokasi.
-- Untuk penanganan darurat jalan: Hubungi Posko Siaga Unit Reaksi Cepat Dinas Bina Marga terdekat atau Call Center 112.
-- Data laporan Anda tetap tersimpan dan disinkronisasi ke dashboard dinas secara real-time.`;
-      successfulModel = 'system-fallback';
+      console.warn('All candidate models failed in chat, providing intelligent LaporInfra fallback:', lastChatError?.message);
+      const fallbackResult = generateIntelligentChatResponse({
+        messages,
+        roleMode,
+        location,
+        reportsDatabase: reportsDatabase as any,
+      });
+      responseText = fallbackResult.text;
+      groundingChunks = fallbackResult.groundingChunks;
+      successfulModel = fallbackResult.modelUsed;
     }
 
     return res.json({
@@ -696,9 +717,19 @@ Jika terjadi keadaan darurat di jalan raya (misal lubang dalam di lajur cepat at
     });
   } catch (chatError: any) {
     console.error('Error in /api/gemini/chat endpoint:', chatError);
-    return res.status(500).json({
-      error: 'Terjadi gangguan saat memproses percakapan AI.',
-      message: chatError?.message || 'Internal Server Error',
+    // Provide resilient fallback even on unexpected exception
+    const fallbackResult = generateIntelligentChatResponse({
+      messages: req.body?.messages || [],
+      roleMode: req.body?.roleMode || 'general',
+      location: req.body?.location,
+      reportsDatabase: reportsDatabase as any,
+    });
+    return res.json({
+      text: fallbackResult.text,
+      groundingChunks: fallbackResult.groundingChunks,
+      groundingMetadata: null,
+      modelUsed: fallbackResult.modelUsed,
+      roleMode: req.body?.roleMode || 'general',
     });
   }
 });

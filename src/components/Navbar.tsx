@@ -14,9 +14,12 @@ import {
   Map,
   LayoutGrid,
   Bell,
-  Crown
+  Crown,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { UserRole } from '../types';
 
 interface NavbarProps {
@@ -35,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSDGModal,
 }) => {
   const { user, userProfile, signInWithGoogle, signOut, setUserRole } = useAuth();
+  const { theme, isDark, toggleTheme } = useTheme();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -139,6 +143,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Theme Toggle Button (Google Dark Grey) */}
+            <button
+              id="theme-toggle-nav-btn"
+              type="button"
+              onClick={toggleTheme}
+              title={isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Google Dark Mode (Dark Grey)'}
+              aria-label="Toggle dark mode"
+              className="flex items-center justify-center h-9 w-9 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-700 transition-all shadow-xs active:scale-90"
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-stone-600" />
+              )}
+            </button>
+
             {/* Report Button */}
             <button
               id="create-report-nav-btn"
@@ -302,6 +322,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                       >
                         <Bell className="h-4 w-4 text-amber-600" />
                         Info SDG 9 & Inovasi
+                      </button>
+                      <button
+                        type="button"
+                        onClick={toggleTheme}
+                        className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          {isDark ? (
+                            <Sun className="h-4 w-4 text-amber-500" />
+                          ) : (
+                            <Moon className="h-4 w-4 text-stone-600" />
+                          )}
+                          <span>Mode Tampilan</span>
+                        </div>
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                          {isDark ? 'Dark Grey' : 'Terang'}
+                        </span>
                       </button>
                       <div className="mx-4 my-1 border-t border-gray-100" />
                       <button

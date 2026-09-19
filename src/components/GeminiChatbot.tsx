@@ -59,8 +59,8 @@ const ROLE_PRESETS: Record<
   general: {
     title: 'Asisten Warga & Konsultasi Pelaporan',
     shortTitle: 'Asisten Warga',
-    model: 'gemini-2.5-flash',
-    modelDisplay: 'Gemini 2.5 Flash',
+    model: 'gemini-3.6-flash',
+    modelDisplay: 'Gemini 3.6 Flash',
     description: 'Panduan umum pelaporan, tips keselamatan, dan edukasi fasilitas publik.',
     icon: Bot,
     accentColor: 'amber',
