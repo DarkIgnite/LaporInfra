@@ -108,6 +108,8 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('Semua');
+
   const handleOpenReportModal = () => {
     setIsCreateModalOpen(true);
   };
@@ -116,9 +118,13 @@ export default function App() {
     setSelectedReportId(reportId);
   };
 
-  const handleReportCreated = (newReportId: string) => {
+  const handleReportCreated = (newReport: InfrastructureReport) => {
+    // 1. Prepend immediately to React state so user sees it in 0ms
+    setReports((prev) => [newReport, ...prev.filter((r) => r.id !== newReport.id)]);
+    // 2. Open report detail modal
+    setSelectedReportId(newReport.id);
+    // 3. Reload in background
     loadReports();
-    setSelectedReportId(newReportId);
   };
 
   const activeReport = reports.find((r) => r.id === selectedReportId) || null;
@@ -132,6 +138,9 @@ export default function App() {
           if (tab === 'admin' && !effectiveAdminUser) {
             setIsLoginModalOpen(true);
           } else {
+            if (tab === 'laporan') {
+              setSelectedCategoryFilter('Semua');
+            }
             setActiveTab(tab);
           }
         }}
@@ -148,7 +157,10 @@ export default function App() {
             reports={reports}
             onOpenReportModal={handleOpenReportModal}
             onNavigateToRadar={() => setActiveTab('asisten')}
-            onNavigateToList={() => setActiveTab('laporan')}
+            onNavigateToList={(cat) => {
+              setSelectedCategoryFilter(cat || 'Semua');
+              setActiveTab('laporan');
+            }}
             onNavigateToMap={() => setActiveTab('peta')}
             onSelectReport={handleSelectReport}
             onOpenSDGModal={() => setIsSDGModalOpen(true)}
@@ -168,7 +180,10 @@ export default function App() {
             reports={reports}
             onOpenReportModal={handleOpenReportModal}
             onNavigateToMap={() => setActiveTab('peta')}
-            onNavigateToList={() => setActiveTab('laporan')}
+            onNavigateToList={() => {
+              setSelectedCategoryFilter('Semua');
+              setActiveTab('laporan');
+            }}
             onSelectReport={handleSelectReport}
             onOpenSDGModal={() => setIsSDGModalOpen(true)}
           />
@@ -189,6 +204,7 @@ export default function App() {
               onSelectReport={handleSelectReport}
               onOpenReportModal={handleOpenReportModal}
               onReportsUpdated={loadReports}
+              initialCategoryFilter={selectedCategoryFilter}
             />
           </div>
         )}

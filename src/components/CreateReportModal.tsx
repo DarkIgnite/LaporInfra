@@ -202,7 +202,7 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
 interface CreateReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onReportCreated: (newReportId: string) => void;
+  onReportCreated: (newReport: InfrastructureReport) => void;
 }
 
 const CATEGORY_OPTIONS: DamageCategory[] = [
@@ -408,7 +408,7 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
       });
       setCreatedTicketNumber(report.ticketNumber);
       setStep('success');
-      onReportCreated(report.id);
+      onReportCreated(report);
     } catch (err) {
       alert('Gagal mengirim laporan. Coba lagi.');
     } finally {

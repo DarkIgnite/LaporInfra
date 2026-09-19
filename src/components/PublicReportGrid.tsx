@@ -32,6 +32,7 @@ interface PublicReportGridProps {
   onSelectReport: (reportId: string) => void;
   onOpenReportModal: () => void;
   onReportsUpdated: () => void;
+  initialCategoryFilter?: string;
 }
 
 export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
@@ -39,13 +40,20 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
   onSelectReport,
   onOpenReportModal,
   onReportsUpdated,
+  initialCategoryFilter,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('Semua');
+  const [categoryFilter, setCategoryFilter] = useState(initialCategoryFilter || 'Semua');
   const [severityFilter, setSeverityFilter] = useState('Semua');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [sortBy, setSortBy] = useState<'terbaru' | 'terlama' | 'keparahan_tertinggi' | 'paling_banyak_dukungan'>('terbaru');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (initialCategoryFilter) {
+      setCategoryFilter(initialCategoryFilter);
+    }
+  }, [initialCategoryFilter]);
 
   // Filter & sort logic
   const filteredReportsList = useMemo(() => {

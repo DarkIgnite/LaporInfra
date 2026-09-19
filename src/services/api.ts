@@ -72,19 +72,23 @@ export function subscribeToReports(
       q,
       (snapshot) => {
         if (!snapshot.empty) {
-          const list = snapshot.docs
+          const firestoreList = snapshot.docs
             .map((docSnap) => docSnap.data() as InfrastructureReport)
             .filter((r) => r && r.id && r.ticketNumber);
-          if (list.length > 0) {
-            saveLocalCache(list);
-            onUpdate(list);
+
+          const cached = getLocalCache();
+          const firestoreIds = new Set(firestoreList.map((r) => r.id));
+          const localOnly = cached.filter((r) => !firestoreIds.has(r.id));
+          const combined = [...localOnly, ...firestoreList];
+
+          if (combined.length > 0) {
+            saveLocalCache(combined);
+            onUpdate(combined);
           } else {
             onUpdate(getLocalCache());
           }
         } else {
-          // If empty, return local fallback & seed
-          const fallback = getLocalCache();
-          onUpdate(fallback);
+          onUpdate(getLocalCache());
         }
       },
       (error) => {
@@ -104,83 +108,87 @@ export function subscribeToReports(
 
 // Fetch reports with filters
 export async function fetchReports(filters?: Partial<ReportFilterState>): Promise<InfrastructureReport[]> {
+  let list: InfrastructureReport[] = [];
+
+  // 1. Try Firestore First
   try {
-    // 1. Try Firestore First
     const colRef = collection(db, REPORTS_COLLECTION);
     const q = query(colRef, orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
 
     if (!snap.empty) {
-      let list = snap.docs
+      list = snap.docs
         .map((d) => d.data() as InfrastructureReport)
         .filter((r) => r && r.id && r.ticketNumber);
-      if (list.length > 0) {
-        saveLocalCache(list);
-      } else {
-        list = getLocalCache();
-      }
-
-      // Apply client-side filters
-      if (filters?.category && filters.category !== 'Semua') {
-        list = list.filter((r) => r.kategori === filters.category);
-      }
-      if (filters?.severity && filters.severity !== 'Semua') {
-        list = list.filter((r) => r.tingkat_keparahan === filters.severity);
-      }
-      if (filters?.status && filters.status !== 'Semua') {
-        list = list.filter((r) => r.status === filters.status);
-      }
-      if (filters?.searchQuery) {
-        const qStr = filters.searchQuery.toLowerCase().trim();
-        list = list.filter(
-          (r) =>
-            r.kategori.toLowerCase().includes(qStr) ||
-            (r.deskripsi_otomatis && r.deskripsi_otomatis.toLowerCase().includes(qStr)) ||
-            (r.deskripsi_manual && r.deskripsi_manual.toLowerCase().includes(qStr)) ||
-            (r.location.address && r.location.address.toLowerCase().includes(qStr)) ||
-            (r.location.city && r.location.city.toLowerCase().includes(qStr)) ||
-            (r.location.province && r.location.province.toLowerCase().includes(qStr)) ||
-            (r.ticketNumber && r.ticketNumber.toLowerCase().includes(qStr))
-        );
-      }
-
-      if (filters?.sortBy === 'keparahan_tertinggi') {
-        const order = { Berat: 3, Sedang: 2, Ringan: 1 };
-        list.sort((a, b) => (order[b.tingkat_keparahan] || 0) - (order[a.tingkat_keparahan] || 0));
-      } else if (filters?.sortBy === 'terlama') {
-        list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      } else if (filters?.sortBy === 'paling_banyak_dukungan') {
-        list.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
-      }
-
-      return list;
     }
   } catch (err) {
     console.warn('Firestore getDocs failed, fallback to Express API / cache:', err);
   }
 
-  // 2. Fallback to server API / local cache
-  try {
-    const params = new URLSearchParams();
-    if (filters?.category && filters.category !== 'Semua') params.append('category', filters.category);
-    if (filters?.severity && filters.severity !== 'Semua') params.append('severity', filters.severity);
-    if (filters?.status && filters.status !== 'Semua') params.append('status', filters.status);
-    if (filters?.searchQuery) params.append('search', filters.searchQuery);
-    if (filters?.sortBy) params.append('sort', filters.sortBy);
-
-    const res = await fetch(`/api/reports?${params.toString()}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.reports) {
-        saveLocalCache(data.reports);
-        return data.reports;
+  // 2. Fallback to Express backend API if remote is empty
+  if (list.length === 0) {
+    try {
+      const res = await fetch('/api/reports');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reports && data.reports.length > 0) {
+          list = data.reports;
+        }
       }
+    } catch (apiErr) {
+      console.warn('API fetch failed:', apiErr);
     }
-  } catch (apiErr) {
-    console.warn('API fetch failed:', apiErr);
   }
 
-  return getLocalCache();
+  // 3. Always merge with locally created reports so recent user submissions never disappear
+  const cached = getLocalCache();
+  const remoteIds = new Set(list.map((r) => r.id));
+  const localOnly = cached.filter((r) => !remoteIds.has(r.id));
+  const merged = [...localOnly, ...list];
+
+  if (merged.length > 0) {
+    list = merged;
+    saveLocalCache(list);
+  } else {
+    list = cached.length > 0 ? cached : SEED_REPORTS;
+  }
+
+  // Apply client-side filters
+  if (filters?.category && filters.category !== 'Semua') {
+    list = list.filter((r) => r.kategori === filters.category);
+  }
+  if (filters?.severity && filters.severity !== 'Semua') {
+    list = list.filter((r) => r.tingkat_keparahan === filters.severity);
+  }
+  if (filters?.status && filters.status !== 'Semua') {
+    list = list.filter((r) => r.status === filters.status);
+  }
+  if (filters?.searchQuery) {
+    const qStr = filters.searchQuery.toLowerCase().trim();
+    list = list.filter(
+      (r) =>
+        r.kategori.toLowerCase().includes(qStr) ||
+        (r.deskripsi_otomatis && r.deskripsi_otomatis.toLowerCase().includes(qStr)) ||
+        (r.deskripsi_manual && r.deskripsi_manual.toLowerCase().includes(qStr)) ||
+        (r.location.address && r.location.address.toLowerCase().includes(qStr)) ||
+        (r.location.city && r.location.city.toLowerCase().includes(qStr)) ||
+        (r.location.province && r.location.province.toLowerCase().includes(qStr)) ||
+        (r.ticketNumber && r.ticketNumber.toLowerCase().includes(qStr))
+    );
+  }
+
+  if (filters?.sortBy === 'keparahan_tertinggi') {
+    const order = { Berat: 3, Sedang: 2, Ringan: 1 };
+    list.sort((a, b) => (order[b.tingkat_keparahan] || 0) - (order[a.tingkat_keparahan] || 0));
+  } else if (filters?.sortBy === 'terlama') {
+    list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  } else if (filters?.sortBy === 'paling_banyak_dukungan') {
+    list.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+  } else {
+    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  return list;
 }
 
 // Fetch single report by ID
@@ -268,27 +276,30 @@ export async function createReport(
     updatedAt: now
   };
 
-  // 1. Write to Firestore
+  // 1. Update local cache immediately so it's instantly available in the UI
+  list.unshift(newReport);
+  saveLocalCache(list);
+
+  // 2. Always persist to Express backend in-memory database
+  try {
+    await fetch('/api/reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newReport),
+    });
+  } catch (e) {
+    console.warn('Express API write failed:', e);
+  }
+
+  // 3. Try to sync to Firestore in background
   try {
     const docRef = doc(db, REPORTS_COLLECTION, newId);
     await setDoc(docRef, newReport);
-    console.log('Report saved directly to Firestore:', newId);
+    console.log('Report synced directly to Firestore:', newId);
   } catch (err) {
-    console.warn('Firestore write failed, fallback to Express API & local cache:', err);
-    try {
-      await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReport),
-      });
-    } catch (e) {
-      console.warn('Express API write failed:', e);
-    }
+    console.warn('Firestore write skipped (persisted in local cache & Express API):', err);
   }
 
-  // 2. Update local cache
-  list.unshift(newReport);
-  saveLocalCache(list);
   return newReport;
 }
 

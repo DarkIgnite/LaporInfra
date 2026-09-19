@@ -32,7 +32,7 @@ interface LandingPageProps {
   reports: InfrastructureReport[];
   onOpenReportModal: () => void;
   onNavigateToRadar: () => void;
-  onNavigateToList: () => void;
+  onNavigateToList: (categoryFilter?: string) => void;
   onNavigateToMap: () => void;
   onSelectReport: (reportId: string) => void;
   onOpenSDGModal: () => void;
@@ -249,6 +249,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const categories = [
     {
       title: 'Jalan Berlubang',
+      categoryValue: 'Jalan Berlubang',
       desc: 'Pothole & retakan aspal di badan jalan',
       image: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Jalan Berlubang').length || 480,
@@ -257,6 +258,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Jembatan Retak',
+      categoryValue: 'Jembatan Retak',
       desc: 'Kerusakan struktur sambungan jembatan',
       image: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Jembatan Retak').length || 120,
@@ -265,14 +267,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Trotoar Rusak',
+      categoryValue: 'Trotoar Rusak',
       desc: 'Paving ambles & ubin difabel pecah',
-      image: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80',
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Trotoar Rusak').length || 210,
       sla: '< 48 Jam',
       color: 'bg-amber-500'
     },
     {
       title: 'Lampu Jalan Mati',
+      categoryValue: 'Lampu Jalan Mati',
       desc: 'PJU padam & kabel penerangan terbuka',
       image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Lampu Jalan Mati').length || 340,
@@ -281,6 +285,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Saluran Air',
+      categoryValue: 'Saluran Air Tersumbat',
       desc: 'Drainase tersumbat lumpur & meluap',
       image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Saluran Air Tersumbat').length || 95,
@@ -289,6 +294,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Fasilitas Publik',
+      categoryValue: 'Fasilitas Publik Lainnya',
       desc: 'Halte bus, taman kota & marka jalan',
       image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Fasilitas Publik Lainnya').length || 60,
@@ -483,7 +489,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               />
             </div>
             <button
-              onClick={onNavigateToList}
+              onClick={() => onNavigateToList()}
               className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white hover:bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors whitespace-nowrap"
             >
               <Search className="h-3.5 w-3.5" />
@@ -505,7 +511,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                   <h2 className="text-base font-bold text-gray-900">Laporan Terbaru</h2>
                   <button
-                    onClick={onNavigateToList}
+                    onClick={() => onNavigateToList()}
                     className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                   >
                     Lihat semua <ChevronRight className="h-3 w-3" />
@@ -522,7 +528,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
                   <button
-                    onClick={onNavigateToList}
+                    onClick={() => onNavigateToList()}
                     className="w-full text-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                   >
                     Lihat semua laporan →
@@ -546,8 +552,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {categories.map((cat) => (
                   <button
                     key={cat.title}
-                    onClick={onOpenReportModal}
-                    className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
+                    onClick={() => onNavigateToList(cat.categoryValue || cat.title)}
+                    className="group relative bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 transition-all text-left cursor-pointer"
                   >
                     <div className="aspect-video relative overflow-hidden">
                       <img
