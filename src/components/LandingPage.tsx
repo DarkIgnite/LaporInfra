@@ -50,8 +50,8 @@ const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMa
     if (!mapRef.current || leafletMapRef.current) return;
 
     const map = L.map(mapRef.current, {
-      center: [-6.2, 106.85],
-      zoom: 11,
+      center: [-6.2088, 106.8456],
+      zoom: 12,
       zoomControl: false,
       scrollWheelZoom: false,
       dragging: false,
@@ -61,13 +61,15 @@ const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMa
       attributionControl: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© CartoDB'
+    // Standard OpenStreetMap tiles - free, stable, no watermark
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     leafletMapRef.current = map;
 
-    // Add pothole pins
+    // Add pothole damage pins
     const pinReports = reports.slice(0, 10);
     pinReports.forEach((report) => {
       const severityColor =
@@ -77,32 +79,54 @@ const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMa
           ? '#f59e0b'
           : '#22c55e';
 
-      const statusIcon = report.status === 'Selesai' ? '✓' : report.status === 'Diproses' ? '⟳' : '!';
+      const isPothole = report.kategori.toLowerCase().includes('jalan') || report.kategori.toLowerCase().includes('lubang');
+
+      const iconHtml = `
+        <div class="cursor-pointer group flex flex-col items-center" style="transform: translate(-50%, -100%);">
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            border: 1.5px solid ${severityColor};
+            border-radius: 9999px;
+            padding: 3px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+            white-space: nowrap;
+          ">
+            <span style="
+              width: 8px;
+              height: 8px;
+              border-radius: 9999px;
+              background: ${severityColor};
+              display: inline-block;
+            "></span>
+            <span style="font-size: 10px; font-weight: 800; color: #1e293b;">${isPothole ? '⚠️ ' + report.kategori : report.kategori}</span>
+          </div>
+          <div style="
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid white;
+            margin-top: -1px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+          "></div>
+        </div>
+      `;
 
       const icon = L.divIcon({
-        className: '',
-        html: `
-          <div style="
-            width: 28px; height: 28px;
-            background: ${severityColor};
-            border: 2.5px solid white;
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-            display: flex; align-items: center; justify-content: center;
-          ">
-            <span style="transform: rotate(45deg); color: white; font-size: 10px; font-weight: 900; line-height: 1;">${statusIcon}</span>
-          </div>
-        `,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28]
+        className: 'custom-pothole-pin',
+        html: iconHtml,
+        iconSize: [120, 36],
+        iconAnchor: [60, 36]
       });
 
       L.marker([report.location.lat, report.location.lng], { icon })
         .addTo(map)
         .bindTooltip(
-          `<div style="font-size:11px;font-weight:700;color:#1e293b">${report.kategori}</div><div style="font-size:10px;color:#64748b">${report.location.city || ''}</div>`,
-          { direction: 'top', offset: [0, -30] }
+          `<div style="font-size:11px;font-weight:700;color:#1e293b;">${report.kategori}</div><div style="font-size:10px;color:#64748b;">${report.location.city || report.location.address || ''} • <b>${report.tingkat_keparahan}</b></div>`,
+          { direction: 'top', offset: [0, -35] }
         );
     });
 
@@ -118,22 +142,22 @@ const MiniMapPreview: React.FC<{ reports: InfrastructureReport[]; onNavigateToMa
     <div className="relative w-full h-full rounded-2xl overflow-hidden">
       <div ref={mapRef} className="w-full h-full" />
       {/* Map overlay gradient bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/60 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white/70 to-transparent pointer-events-none z-[400]" />
       {/* Expand button */}
       <button
         onClick={onNavigateToMap}
-        className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm hover:bg-gray-50 transition-colors z-10"
+        className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white text-gray-800 border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold shadow-md hover:bg-gray-50 transition-colors z-[500]"
       >
-        <Navigation2 className="h-3.5 w-3.5 text-blue-500" />
-        Buka Peta Penuh
+        <Navigation2 className="h-3.5 w-3.5 text-blue-600" />
+        Buka Radar Penuh
       </button>
       {/* Live badge */}
-      <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/95 border border-gray-200 rounded-full px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm z-10">
+      <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/95 border border-gray-200 rounded-full px-2.5 py-1 text-xs font-bold text-gray-800 shadow-sm z-[500]">
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
         </span>
-        Live Map
+        Live Radar Kerusakan
       </div>
     </div>
   );
@@ -233,15 +257,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Jembatan Retak',
-      desc: 'Kerusakan struktural pada jembatan',
-      image: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=600&q=80',
+      desc: 'Kerusakan struktur sambungan jembatan',
+      image: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Jembatan Retak').length || 120,
       sla: '< 12 Jam',
       color: 'bg-orange-500'
     },
     {
       title: 'Trotoar Rusak',
-      desc: 'Paving ambles & fasilitas difabel',
+      desc: 'Paving ambles & ubin difabel pecah',
       image: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Trotoar Rusak').length || 210,
       sla: '< 48 Jam',
@@ -249,7 +273,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Lampu Jalan Mati',
-      desc: 'PJU padam & kabel terbuka',
+      desc: 'PJU padam & kabel penerangan terbuka',
       image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Lampu Jalan Mati').length || 340,
       sla: '< 24 Jam',
@@ -257,7 +281,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Saluran Air',
-      desc: 'Drainase tersumbat & meluap',
+      desc: 'Drainase tersumbat lumpur & meluap',
       image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Saluran Air Tersumbat').length || 95,
       sla: '< 48 Jam',
@@ -265,8 +289,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       title: 'Fasilitas Publik',
-      desc: 'Taman, halte, dan fasilitas umum',
-      image: 'https://images.unsplash.com/photo-1588694926280-3ae414d06ccb?auto=format&fit=crop&w=600&q=80',
+      desc: 'Halte bus, taman kota & marka jalan',
+      image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=600&q=80',
       count: reports.filter(r => r.kategori === 'Fasilitas Publik Lainnya').length || 60,
       sla: '< 72 Jam',
       color: 'bg-purple-500'
@@ -377,8 +401,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Right: Mini Map Preview */}
-            <div className="relative">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+            <div>
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
                 {/* Map header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-2">
@@ -386,7 +410,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <span className="text-sm font-semibold text-gray-800">Peta Kerusakan Real-Time</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-gray-500">{reports.length} titik aktif</span>
+                    <span className="text-xs text-gray-500 font-medium">{reports.length} titik terdeteksi</span>
                   </div>
                 </div>
 
@@ -396,9 +420,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
 
                 {/* Legend */}
-                <div className="flex items-center justify-center gap-4 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-gray-600">
+                <div className="flex items-center justify-center gap-5 px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-xs text-gray-600 font-medium">
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-red-500 shrink-0" />Berat
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-500 shrink-0" />Kritis / Berat
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-amber-500 shrink-0" />Sedang
@@ -409,26 +433,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              {/* Floating recent activity */}
-              <div className="absolute -bottom-4 -left-4 hidden lg:block bg-white border border-gray-200 rounded-xl shadow-md p-3 w-52">
-                <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
-                  <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
-                  Terbaru hari ini
-                </p>
-                {recentReports.slice(0, 2).map((r) => (
-                  <div key={r.id} className="flex items-center gap-2 py-1">
-                    <img
-                      src={r.imageUrl}
-                      alt={r.kategori}
-                      className="h-7 w-7 rounded-lg object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-semibold text-gray-800 truncate">{r.kategori}</p>
-                      <p className="text-[9px] text-gray-400">{r.location.city}</p>
-                    </div>
-                  </div>
-                ))}
+              {/* Verified Recent Reports Strip */}
+              <div className="mt-3 bg-white border border-gray-200 rounded-xl p-3 shadow-xs flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 shrink-0">
+                  <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
+                  <span>Terbaru:</span>
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                  {recentReports.slice(0, 3).map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => onSelectReport(r.id)}
+                      className="flex items-center gap-2 bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200/80 rounded-lg px-2.5 py-1.5 text-left shrink-0 transition-all"
+                    >
+                      <img
+                        src={r.imageUrl}
+                        alt={r.kategori}
+                        className="h-6 w-6 rounded object-cover shrink-0"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="text-[10px] leading-tight">
+                        <p className="font-bold text-gray-800 truncate max-w-[90px]">{r.kategori}</p>
+                        <p className="text-gray-400 truncate max-w-[90px]">{r.location.city || 'Indonesia'}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
