@@ -129,10 +129,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={item.id}
                 id={`nav-tab-${item.id}`}
                 onClick={() => onNavigate(item.id)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all ${
                   activeTab === item.id
-                    ? 'bg-amber-50 text-amber-900 font-bold border-b-2 border-amber-500'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                 }`}
               >
                 {item.icon}

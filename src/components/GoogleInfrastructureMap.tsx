@@ -147,32 +147,39 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
       const isSelected = selectedReport?.id === report.id;
       const sev = getSeverityStyle(report.tingkat_keparahan);
 
+      const cardBg = isDark ? '#242528' : '#ffffff';
+      const cardBorder = isSelected
+        ? '#f59e0b'
+        : isDark
+        ? '#3c4043'
+        : '#e2e8f0';
+      const titleColor = isDark ? '#ffffff' : '#0f172a';
+      const subtitleColor = isDark ? '#fcd34d' : '#64748b';
+      const cardShadow = isDark
+        ? '0 6px 20px rgba(0, 0, 0, 0.7)'
+        : '0 4px 14px rgba(0, 0, 0, 0.1)';
+
       const markerHtml = `
         <div class="cursor-pointer transition-all duration-200 ${
           isSelected ? 'scale-110 z-50' : 'hover:scale-105'
         }" style="transform: translate(-50%, -100%);">
-          <div class="bg-white rounded-xl shadow-md border ${
-            isSelected
-              ? 'border-amber-500 ring-3 ring-amber-400/30'
-              : 'border-slate-200 hover:border-slate-300'
-          } p-1.5 flex items-center gap-1.5 min-w-[125px] max-w-[175px]">
+          <div style="background-color: ${cardBg}; border: 1.5px solid ${cardBorder}; box-shadow: ${cardShadow};" class="rounded-xl p-1.5 flex items-center gap-2 min-w-[130px] max-w-[185px]">
             <img
               src="${report.imageUrl}"
               alt="${report.kategori}"
               class="w-7 h-7 rounded-lg object-cover shrink-0"
+              style="border: 1px solid ${isDark ? '#3c4043' : '#e2e8f0'};"
               crossOrigin="anonymous"
             />
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full ${sev.dot} shrink-0"></span>
-                <span class="text-[10px] font-bold text-slate-800 truncate">${report.title || report.kategori}</span>
+                <span style="color: ${titleColor}; font-weight: 800; font-size: 11px; line-height: 1.2;" class="truncate block">${report.title || report.kategori}</span>
               </div>
-              <div class="text-[9px] text-slate-500 font-medium truncate">${report.location.address?.split(',')[0] || 'Lokasi'}</div>
+              <div style="color: ${subtitleColor}; font-weight: 600; font-size: 9px; line-height: 1.2; margin-top: 2px;" class="truncate">${report.location.address?.split(',')[0] || 'Lokasi'}</div>
             </div>
           </div>
-          <div class="w-2 h-2 bg-white rotate-45 mx-auto -mt-1 border-r border-b ${
-            isSelected ? 'border-amber-500' : 'border-slate-200'
-          }"></div>
+          <div style="background-color: ${cardBg}; border-right: 1.5px solid ${cardBorder}; border-bottom: 1.5px solid ${cardBorder};" class="w-2 h-2 rotate-45 mx-auto -mt-1"></div>
         </div>
       `;
 
@@ -191,7 +198,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
 
       markersGroup.addLayer(marker);
     });
-  }, [reports, selectedReport, onSelectReport]);
+  }, [reports, selectedReport, onSelectReport, isDark]);
 
   // Pan map when a report is selected
   useEffect(() => {

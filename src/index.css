@@ -243,26 +243,32 @@ html.dark .border-stone-300 {
 /* Typography in Dark Mode */
 html.dark .text-stone-900,
 html.dark .text-gray-900,
+html.dark .text-slate-900,
 html.dark .text-stone-800,
 html.dark .text-gray-800,
+html.dark .text-slate-800,
 html.dark .text-black {
   color: #e8eaed !important;
 }
 
 html.dark .text-stone-700,
-html.dark .text-gray-700 {
+html.dark .text-gray-700,
+html.dark .text-slate-700 {
   color: #d1d5db !important;
 }
 
 html.dark .text-stone-600,
 html.dark .text-gray-600,
+html.dark .text-slate-600,
 html.dark .text-stone-500,
-html.dark .text-gray-500 {
+html.dark .text-gray-500,
+html.dark .text-slate-500 {
   color: #9aa0a6 !important;
 }
 
 html.dark .text-stone-400,
-html.dark .text-gray-400 {
+html.dark .text-gray-400,
+html.dark .text-slate-400 {
   color: #80868b !important;
 }
 
@@ -500,6 +506,32 @@ html.dark ::-webkit-scrollbar-thumb {
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: #5f6368;
 }
+
+/* ==========================================================================
+   Clean Up Harsh Outlines & Rings in Dark Mode
+   ========================================================================== */
+html.dark [class*="ring-"]:not([class*="ring-amber"]):not([class*="ring-emerald"]):not([class*="ring-rose"]) {
+  --tw-ring-shadow: none !important;
+  box-shadow: none !important;
+}
+
+html.dark button:focus-visible,
+html.dark a:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Incident Markers in Dark Mode - High Contrast & Elevated Design */
+html.dark .google-incident-marker .text-slate-800,
+html.dark .google-incident-marker .text-slate-900 {
+  color: #ffffff !important;
+}
+
+html.dark .google-incident-marker .text-slate-500,
+html.dark .google-incident-marker .text-slate-600 {
+  color: #fcd34d !important;
+}
+
 
 
 

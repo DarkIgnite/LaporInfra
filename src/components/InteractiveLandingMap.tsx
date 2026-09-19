@@ -273,34 +273,43 @@ export const InteractiveLandingMap: React.FC<InteractiveLandingMapProps> = ({
       const isSelected = activeReport?.id === report.id;
       const sev = getSeverityStyle(report.tingkat_keparahan);
 
+      const cardBg = isDark ? '#242528' : '#ffffff';
+      const cardBorder = isSelected
+        ? '#f59e0b'
+        : isDark
+        ? '#3c4043'
+        : '#e2e8f0';
+      const titleColor = isDark ? '#ffffff' : '#0f172a';
+      const cardShadow = isDark
+        ? '0 6px 20px rgba(0, 0, 0, 0.7)'
+        : '0 4px 14px rgba(0, 0, 0, 0.1)';
+
       // Custom pulsing interactive HTML pin
       const markerHtml = `
         <div class="cursor-pointer transition-all duration-300 ${isSelected ? 'scale-115 z-50' : 'hover:scale-110'}" style="transform: translate(-50%, -100%);">
-          <div class="relative flex items-center gap-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-1.5 border-2 ${
-            isSelected ? 'border-amber-500 ring-4 ring-amber-500/30' : 'border-stone-200 hover:border-amber-500'
+          <div style="background-color: ${cardBg}; border: 1.5px solid ${cardBorder}; box-shadow: ${cardShadow};" class="relative flex items-center gap-2 backdrop-blur-md rounded-2xl p-1.5 ${
+            isSelected ? 'ring-2 ring-amber-500/40' : ''
           }">
-            <div class="relative w-8 h-8 rounded-xl overflow-hidden shrink-0 bg-stone-100">
+            <div class="relative w-8 h-8 rounded-xl overflow-hidden shrink-0 bg-stone-100 dark:bg-stone-800">
               <img src="${report.imageUrl}" alt="${report.kategori}" class="w-full h-full object-cover" crossOrigin="anonymous" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <span class="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full ${sev.dot} ring-1 ring-white"></span>
             </div>
             <div class="pr-2 min-w-0">
               <div class="flex items-center gap-1">
-                <span class="text-[10px] font-black tracking-tight text-stone-900 truncate max-w-[120px]">${report.title || report.kategori}</span>
+                <span style="color: ${titleColor}; font-weight: 800; font-size: 11px;" class="tracking-tight truncate max-w-[130px] block">${report.title || report.kategori}</span>
               </div>
               <div class="flex items-center gap-1 text-[9px] font-bold ${
-                report.tingkat_keparahan === 'Berat' ? 'text-rose-600' : 'text-amber-600'
+                report.tingkat_keparahan === 'Berat' ? 'text-rose-500' : 'text-amber-500'
               }">
                 <span>${report.tingkat_keparahan}</span>
                 <span class="text-stone-400">&bull;</span>
-                <span class="text-stone-500 truncate max-w-[70px]">${report.ticketNumber}</span>
+                <span class="text-stone-400 truncate max-w-[70px]">${report.ticketNumber}</span>
               </div>
             </div>
           </div>
           <!-- Pointer Pin Arrow -->
-          <div class="w-3 h-3 bg-white rotate-45 mx-auto -mt-1.5 border-r-2 border-b-2 ${
-            isSelected ? 'border-amber-500' : 'border-stone-800/80'
-          }"></div>
+          <div style="background-color: ${cardBg}; border-right: 1.5px solid ${cardBorder}; border-bottom: 1.5px solid ${cardBorder};" class="w-2.5 h-2.5 rotate-45 mx-auto -mt-1.5"></div>
         </div>
       `;
 
@@ -319,7 +328,7 @@ export const InteractiveLandingMap: React.FC<InteractiveLandingMapProps> = ({
 
       group.addLayer(marker);
     });
-  }, [filteredReports, activeReport]);
+  }, [filteredReports, activeReport, isDark]);
 
   // Update User Location Dot
   useEffect(() => {
