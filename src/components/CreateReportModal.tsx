@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import {
   X,
   Camera,
@@ -9,7 +10,10 @@ import {
   CheckCircle2,
   RefreshCw,
   Crosshair,
-  Image
+  Image,
+  Map as MapIcon,
+  ChevronUp,
+  Navigation
 } from 'lucide-react';
 import {
   DamageCategory,
@@ -27,6 +31,177 @@ import {
   getReadableAddress
 } from '../utils/locationService';
 import { useAuth } from '../context/AuthContext';
+
+// --- Interactive Location Pin Picker Map ---
+interface LocationPickerMapProps {
+  lat: number;
+  lng: number;
+  onLocationChange: (lat: number, lng: number) => void;
+  onClose: () => void;
+  isLocating?: boolean;
+  onLocateMe?: () => void;
+}
+
+const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
+  lat,
+  lng,
+  onLocationChange,
+  onClose,
+  isLocating,
+  onLocateMe
+}) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+
+  const createDamagePinIcon = () => {
+    return L.divIcon({
+      className: 'damage-pin-picker-marker',
+      html: `
+        <div style="transform: translate(-50%, -100%); cursor: grab; display: flex; flex-col; items-center;">
+          <div style="
+            background: #ef4444;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 2px solid white;
+            box-shadow: 0 4px 14px rgba(239,68,68,0.45);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+          ">
+            <span>📍 Titik Kerusakan</span>
+          </div>
+          <div style="
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #ef4444;
+            margin: -1px auto 0 auto;
+          "></div>
+        </div>
+      `,
+      iconSize: [120, 42],
+      iconAnchor: [60, 42]
+    });
+  };
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    if (!mapRef.current) {
+      const map = L.map(containerRef.current, {
+        center: [lat, lng],
+        zoom: 15,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      // Create draggable pin marker
+      const marker = L.marker([lat, lng], {
+        icon: createDamagePinIcon(),
+        draggable: true
+      }).addTo(map);
+
+      marker.on('dragend', () => {
+        const position = marker.getLatLng();
+        onLocationChange(Number(position.lat.toFixed(5)), Number(position.lng.toFixed(5)));
+      });
+
+      map.on('click', (e: L.LeafletMouseEvent) => {
+        const clickedLat = Number(e.latlng.lat.toFixed(5));
+        const clickedLng = Number(e.latlng.lng.toFixed(5));
+        marker.setLatLng([clickedLat, clickedLng]);
+        onLocationChange(clickedLat, clickedLng);
+      });
+
+      mapRef.current = map;
+      markerRef.current = marker;
+
+      // Invalidate size after modal render
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 250);
+    } else {
+      mapRef.current.setView([lat, lng], mapRef.current.getZoom());
+      if (markerRef.current) {
+        markerRef.current.setLatLng([lat, lng]);
+      }
+    }
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update marker position when lat/lng props change from outside
+  useEffect(() => {
+    if (markerRef.current && mapRef.current) {
+      const currentPos = markerRef.current.getLatLng();
+      if (Math.abs(currentPos.lat - lat) > 0.0001 || Math.abs(currentPos.lng - lng) > 0.0001) {
+        markerRef.current.setLatLng([lat, lng]);
+        mapRef.current.panTo([lat, lng]);
+      }
+    }
+  }, [lat, lng]);
+
+  return (
+    <div className="rounded-xl border-2 border-blue-500 overflow-hidden bg-white shadow-md space-y-0">
+      {/* Map Header Controls */}
+      <div className="flex items-center justify-between px-3 py-2 bg-blue-50 border-b border-blue-100 text-xs">
+        <div className="flex items-center gap-1.5 font-bold text-blue-900">
+          <MapPin className="h-4 w-4 text-red-500" />
+          <span>Klik atau geser pin ke titik kerusakan</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {onLocateMe && (
+            <button
+              type="button"
+              onClick={onLocateMe}
+              disabled={isLocating}
+              className="flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-200 rounded-md px-2 py-0.5 shadow-2xs"
+            >
+              <Crosshair className={`h-3 w-3 ${isLocating ? 'animate-spin' : ''}`} />
+              <span>Lokasi Saya</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-0.5 text-[11px] font-semibold text-gray-500 hover:text-gray-800"
+          >
+            <ChevronUp className="h-3.5 w-3.5" />
+            <span>Tutup</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Leaflet Map Canvas */}
+      <div className="relative h-56 sm:h-64 w-full">
+        <div ref={containerRef} className="h-full w-full" />
+        {/* Floating Instruction Banner */}
+        <div className="absolute bottom-2 inset-x-2 z-[500] pointer-events-none flex justify-center">
+          <div className="bg-white/95 backdrop-blur-xs border border-gray-200 rounded-lg px-3 py-1 shadow-sm text-[10px] font-medium text-gray-700 text-center">
+            💡 <b>Tips:</b> Klik pada peta jalan atau tarik pin merah tepat di posisi lubang/kerusakan
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface CreateReportModalProps {
   isOpen: boolean;
@@ -84,9 +259,37 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [showCityDropdown, setShowCityDropdown] = useState<boolean>(false);
+  const [showMapPicker, setShowMapPicker] = useState<boolean>(false);
+  const [isReverseGeocoding, setIsReverseGeocoding] = useState<boolean>(false);
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [createdTicketNumber, setCreatedTicketNumber] = useState<string | null>(null);
+
+  const updateLocationCoords = async (lat: number, lng: number) => {
+    setIsReverseGeocoding(true);
+    try {
+      const addr = await getReadableAddress(lat, lng);
+      setLocation((prev) => ({
+        ...prev,
+        lat,
+        lng,
+        address: addr.address || `Koordinat ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+        city: addr.city || prev.city,
+        district: addr.district || prev.district,
+        isGps: false,
+      }));
+    } catch (e) {
+      setLocation((prev) => ({
+        ...prev,
+        lat,
+        lng,
+        address: `Koordinat ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+        isGps: false,
+      }));
+    } finally {
+      setIsReverseGeocoding(false);
+    }
+  };
 
   const detectLocation = async () => {
     setIsLocating(true);
@@ -249,48 +452,77 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
           {step === 'initial' && (
             <div className="space-y-4">
               {/* Location bar */}
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
-                <div className="flex items-center gap-2 min-w-0">
-                  <MapPin className="h-4 w-4 text-blue-500 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 truncate">{location.city || 'Mendeteksi lokasi...'}</p>
-                    <p className="text-[10px] text-gray-500 truncate">{location.address}</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MapPin className="h-4 w-4 text-red-500 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-gray-800 truncate">{location.city || 'Mendeteksi lokasi...'}</p>
+                      <p className="text-[10px] text-gray-500 truncate">{isReverseGeocoding ? 'Mengambil alamat titik baru...' : location.address}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={detectLocation}
-                    disabled={isLocating}
-                    className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                  >
-                    <Crosshair className={`h-3.5 w-3.5 ${isLocating ? 'animate-spin' : ''}`} />
-                    GPS
-                  </button>
-                  <div className="relative">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => setShowCityDropdown(!showCityDropdown)}
-                      className="text-[11px] font-semibold text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-2 py-0.5"
+                      onClick={() => setShowMapPicker(!showMapPicker)}
+                      className={`text-[11px] font-bold flex items-center gap-1 rounded-lg px-2.5 py-1 transition-all ${
+                        showMapPicker
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-white border border-blue-200 text-blue-600 hover:bg-blue-50'
+                      }`}
                     >
-                      Kota ▾
+                      <MapIcon className="h-3.5 w-3.5" />
+                      <span>{showMapPicker ? 'Tutup Peta' : 'Pin di Peta'}</span>
                     </button>
-                    {showCityDropdown && (
-                      <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-white rounded-xl border border-gray-200 shadow-xl p-1 max-h-48 overflow-y-auto">
-                        {INDONESIA_CITY_PRESETS.map((c) => (
-                          <button
-                            key={c.name}
-                            type="button"
-                            onClick={() => handleSelectCityPreset(c)}
-                            className="w-full text-left px-2.5 py-1.5 text-xs hover:bg-blue-50 text-gray-700 rounded-lg"
-                          >
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    <button
+                      type="button"
+                      onClick={detectLocation}
+                      disabled={isLocating}
+                      className="text-[11px] font-semibold text-gray-600 hover:text-gray-900 border border-gray-200 bg-white rounded-lg px-2 py-1 flex items-center gap-1"
+                      title="Gunakan GPS lokasi saya"
+                    >
+                      <Crosshair className={`h-3 w-3 ${isLocating ? 'animate-spin text-blue-600' : ''}`} />
+                      <span className="hidden sm:inline">GPS</span>
+                    </button>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowCityDropdown(!showCityDropdown)}
+                        className="text-[11px] font-semibold text-gray-500 hover:text-gray-700 border border-gray-200 bg-white rounded-lg px-2 py-1"
+                      >
+                        Kota ▾
+                      </button>
+                      {showCityDropdown && (
+                        <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-white rounded-xl border border-gray-200 shadow-xl p-1 max-h-48 overflow-y-auto">
+                          {INDONESIA_CITY_PRESETS.map((c) => (
+                            <button
+                              key={c.name}
+                              type="button"
+                              onClick={() => handleSelectCityPreset(c)}
+                              className="w-full text-left px-2.5 py-1.5 text-xs hover:bg-blue-50 text-gray-700 rounded-lg"
+                            >
+                              {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Interactive Pin Map Picker in Step 1 */}
+                {showMapPicker && (
+                  <div className="pt-1">
+                    <LocationPickerMap
+                      lat={location.lat}
+                      lng={location.lng}
+                      onLocationChange={updateLocationCoords}
+                      onClose={() => setShowMapPicker(false)}
+                      isLocating={isLocating}
+                      onLocateMe={detectLocation}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Photo actions */}
@@ -444,12 +676,35 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                 </div>
               </div>
 
-              {/* Location */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 text-blue-500" />
-                  Alamat
-                </label>
+              {/* Location with Interactive Pin Trigger */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 text-red-500" />
+                    <span>Titik Lokasi &amp; Alamat</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(!showMapPicker)}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  >
+                    <MapIcon className="h-3.5 w-3.5" />
+                    <span>{showMapPicker ? 'Tutup Peta' : '📍 Pasang Pin di Peta'}</span>
+                  </button>
+                </div>
+
+                {/* Map Picker in Step 3 */}
+                {showMapPicker && (
+                  <LocationPickerMap
+                    lat={location.lat}
+                    lng={location.lng}
+                    onLocationChange={updateLocationCoords}
+                    onClose={() => setShowMapPicker(false)}
+                    isLocating={isLocating}
+                    onLocateMe={detectLocation}
+                  />
+                )}
+
                 <input
                   type="text"
                   required
@@ -458,6 +713,10 @@ export const CreateReportModal: React.FC<CreateReportModalProps> = ({
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:border-blue-500 focus:outline-none"
                   placeholder="Alamat lokasi kerusakan"
                 />
+                <div className="flex items-center justify-between text-[10px] text-gray-400 px-0.5">
+                  <span>Koordinat: {location.lat.toFixed(5)}, {location.lng.toFixed(5)} ({location.city})</span>
+                  {isReverseGeocoding && <span className="text-blue-500 font-semibold animate-pulse">Menyelaraskan alamat titik baru...</span>}
+                </div>
               </div>
 
               {/* Notes & Name */}
