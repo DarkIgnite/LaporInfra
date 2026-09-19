@@ -155,9 +155,9 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
 
           <button
             onClick={onOpenReportModal}
-            className="self-start md:self-auto inline-flex items-center gap-2 rounded-full bg-stone-900 hover:bg-stone-800 px-6 py-2.5 text-xs font-bold text-white shadow-md active:scale-98 transition-all"
+            className="self-start md:self-auto inline-flex items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-amber-500/20 active:scale-98 transition-all"
           >
-            <Sparkles className="h-4 w-4 text-amber-400" />
+            <Sparkles className="h-4 w-4 text-white" />
             <span>+ Buat Laporan Baru</span>
           </button>
         </div>
@@ -252,7 +252,7 @@ export const PublicReportGrid: React.FC<PublicReportGridProps> = ({
                   onClick={() => setSortBy(s.key as any)}
                   className={`rounded-full px-3 py-1 font-semibold transition-colors ${
                     sortBy === s.key
-                      ? 'bg-stone-900 text-white'
+                      ? 'bg-amber-500 text-white'
                       : 'text-stone-600 hover:bg-stone-100'
                   }`}
                 >

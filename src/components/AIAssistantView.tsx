@@ -30,20 +30,20 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({
       <div className="border-b border-gray-100 bg-gray-50 px-4 sm:px-6 py-2.5 shrink-0">
         <div className="mx-auto max-w-3xl flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-600">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
             <span className="text-sm font-semibold text-gray-800">Asisten LaporInfra</span>
             <span className="hidden sm:inline text-gray-300">•</span>
             <span className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500">
-              <Database className="h-3 w-3" />
+              <Database className="h-3 w-3 text-amber-600" />
               Terhubung dengan data kerusakan infrastruktur
             </span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenReportModal}
-              className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 border border-blue-200 rounded-full px-3 py-1 hover:bg-blue-50 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 border border-amber-300 rounded-full px-3 py-1 hover:bg-amber-50 transition-colors"
             >
               <Camera className="h-3 w-3" />
               <span className="hidden sm:inline">Buat Laporan</span>

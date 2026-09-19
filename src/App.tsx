@@ -131,7 +131,7 @@ export default function App() {
   const activeReport = reports.find((r) => r.id === selectedReportId) || null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 font-sans antialiased selection:bg-amber-500 selection:text-white">
       {/* Top Navigation Bar - Minimal & Streamlined */}
       <Navbar
         activeTab={activeTab}
@@ -195,6 +195,7 @@ export default function App() {
             reports={reports}
             onSelectReport={handleSelectReport}
             onOpenReportModal={handleOpenReportModal}
+            onReportsUpdated={loadReports}
           />
         )}
 

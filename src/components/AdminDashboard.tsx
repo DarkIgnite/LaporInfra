@@ -204,7 +204,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-stone-800">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${isSuperAdmin ? 'bg-gradient-to-tr from-amber-500 to-orange-500' : 'bg-blue-600'} text-white shadow-md`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${isSuperAdmin ? 'bg-gradient-to-tr from-amber-500 to-orange-500' : 'bg-amber-600'} text-white shadow-md`}>
                 {isSuperAdmin ? <Crown className="h-5 w-5 text-white" /> : <Building2 className="h-5 w-5 stroke-[2.2]" />}
               </div>
               <h1 className="text-xl sm:text-2xl font-black tracking-tight">

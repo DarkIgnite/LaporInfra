@@ -110,11 +110,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onNavigate('beranda')}
             className="flex items-center gap-2 text-left shrink-0 group"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm group-hover:bg-blue-700 transition-colors">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm group-hover:bg-amber-600 transition-colors">
               <MapPin className="h-4 w-4 fill-white stroke-white stroke-0" />
             </div>
             <span className="font-black text-lg tracking-tight text-gray-900 leading-none">
-              Lapor<span className="text-blue-600">Infra</span>
+              Lapor<span className="text-amber-600">Infra</span>
             </span>
           </button>
 
@@ -127,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onNavigate(item.id)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${
                   activeTab === item.id
-                    ? 'bg-blue-50 text-blue-700 font-semibold'
+                    ? 'bg-amber-50 text-amber-900 font-bold border-b-2 border-amber-500'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
@@ -143,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="create-report-nav-btn"
               onClick={onOpenReportModal}
-              className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-semibold shadow-sm active:scale-95 transition-all"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 text-sm font-bold shadow-sm shadow-amber-500/20 active:scale-95 transition-all"
             >
               <Camera className="h-4 w-4" />
               <span className="hidden sm:inline">Lapor</span>
@@ -182,7 +182,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       className="h-7 w-7 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-white font-bold text-xs">
                       {(user.displayName || 'U').charAt(0)}
                     </div>
                   )}
@@ -196,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         Admin
                       </span>
                     ) : isPetugas ? (
-                      <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">
                         Petugas
                       </span>
                     ) : null}
@@ -247,7 +247,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onClick={() => handleRoleChange('warga')}
                           className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-lg text-[11px] font-semibold transition-all border ${
                             userProfile?.role === 'warga' || (!userProfile?.role && !isPetugas && !isSuperAdmin)
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                              ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
                               : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                           }`}
                         >
@@ -259,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onClick={() => handleRoleChange('petugas')}
                           className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-lg text-[11px] font-semibold transition-all border ${
                             userProfile?.role === 'petugas'
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                              ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
                               : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                           }`}
                         >
@@ -300,7 +300,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onClick={() => { setIsDropdownOpen(false); onOpenSDGModal(); }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        <Bell className="h-4 w-4 text-blue-500" />
+                        <Bell className="h-4 w-4 text-amber-600" />
                         Info SDG 9 & Inovasi
                       </button>
                       <div className="mx-4 my-1 border-t border-gray-100" />
@@ -326,13 +326,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           onClick={() => onNavigate('beranda')}
           className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] py-1 px-2 rounded-xl text-[10px] font-semibold transition-all relative ${
-            activeTab === 'beranda' ? 'text-blue-600' : 'text-gray-400'
+            activeTab === 'beranda' ? 'text-amber-600' : 'text-gray-400'
           }`}
         >
           <Home className={`h-5 w-5 ${activeTab === 'beranda' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
           <span className="mt-0.5">Beranda</span>
           {activeTab === 'beranda' && (
-            <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-blue-600" />
+            <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-amber-500" />
           )}
         </button>
 
@@ -340,20 +340,20 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           onClick={() => onNavigate('laporan')}
           className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] py-1 px-2 rounded-xl text-[10px] font-semibold transition-all relative ${
-            activeTab === 'laporan' ? 'text-blue-600' : 'text-gray-400'
+            activeTab === 'laporan' ? 'text-amber-600' : 'text-gray-400'
           }`}
         >
           <ListFilter className={`h-5 w-5 ${activeTab === 'laporan' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
           <span className="mt-0.5">Laporan</span>
           {activeTab === 'laporan' && (
-            <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-blue-600" />
+            <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-amber-500" />
           )}
         </button>
 
         {/* Center Report FAB */}
         <button
           onClick={onOpenReportModal}
-          className="flex flex-col items-center justify-center -mt-5 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 active:scale-95 transition-all"
+          className="flex flex-col items-center justify-center -mt-5 h-14 w-14 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30 active:scale-95 transition-all"
         >
           <Plus className="h-6 w-6 stroke-[2.5]" />
         </button>
@@ -362,13 +362,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           onClick={() => onNavigate('peta')}
           className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] py-1 px-2 rounded-xl text-[10px] font-semibold transition-all relative ${
-            activeTab === 'peta' ? 'text-blue-600' : 'text-gray-400'
+            activeTab === 'peta' ? 'text-amber-600' : 'text-gray-400'
           }`}
         >
           <Map className={`h-5 w-5 ${activeTab === 'peta' ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
           <span className="mt-0.5">Peta</span>
           {activeTab === 'peta' && (
-            <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-blue-600" />
+            <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-amber-500" />
           )}
         </button>
 
@@ -377,7 +377,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => onNavigate('admin')}
             className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] py-1 px-2 rounded-xl text-[10px] font-semibold transition-all relative ${
-              activeTab === 'admin' ? 'text-blue-600' : 'text-gray-400'
+              activeTab === 'admin' ? 'text-amber-600' : 'text-gray-400'
             }`}
           >
             {isSuperAdmin ? (
@@ -387,20 +387,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
             <span className="mt-0.5">{isSuperAdmin ? 'Admin' : 'Dinas PU'}</span>
             {activeTab === 'admin' && (
-              <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-blue-600" />
+              <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-amber-500" />
             )}
           </button>
         ) : (
           <button
             onClick={() => onNavigate('asisten')}
             className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] py-1 px-2 rounded-xl text-[10px] font-semibold transition-all relative ${
-              activeTab === 'asisten' ? 'text-blue-600' : 'text-gray-400'
+              activeTab === 'asisten' ? 'text-amber-600' : 'text-gray-400'
             }`}
           >
-            <Sparkles className={`h-5 w-5 ${activeTab === 'asisten' ? 'stroke-[2.5] text-blue-600' : 'stroke-[1.5]'}`} />
+            <Sparkles className={`h-5 w-5 ${activeTab === 'asisten' ? 'stroke-[2.5] text-amber-600' : 'stroke-[1.5]'}`} />
             <span className="mt-0.5">Tanya AI</span>
             {activeTab === 'asisten' && (
-              <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-blue-600" />
+              <span className="absolute bottom-0.5 h-0.5 w-5 rounded-full bg-amber-500" />
             )}
           </button>
         )}

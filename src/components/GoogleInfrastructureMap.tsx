@@ -94,21 +94,21 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
     if (radarRadiusMeters > 0) {
       const circle = L.circle([lat, lng], {
         radius: radarRadiusMeters,
-        color: '#2563eb',
-        fillColor: '#3b82f6',
-        fillOpacity: 0.12,
+        color: '#d97706',
+        fillColor: '#f59e0b',
+        fillOpacity: 0.14,
         weight: 1.5,
         dashArray: '5, 6'
       }).addTo(map);
       userCircleRef.current = circle;
     }
 
-    // High-contrast pulsing blue GPS locator dot
+    // High-contrast pulsing amber GPS locator dot
     const userHtml = `
       <div style="position: relative; display: flex; align-items: center; justify-content: center; transform: translate(-50%, -50%);">
-        <div style="position: absolute; width: 44px; height: 44px; border-radius: 9999px; background-color: rgba(37, 99, 235, 0.2); animation: ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-        <div style="position: absolute; width: 26px; height: 26px; border-radius: 9999px; background-color: rgba(59, 130, 246, 0.35);"></div>
-        <div style="width: 14px; height: 14px; border-radius: 9999px; background-color: #1d4ed8; border: 2.5px solid #ffffff; box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.25);"></div>
+        <div style="position: absolute; width: 44px; height: 44px; border-radius: 9999px; background-color: rgba(245, 158, 11, 0.25); animation: ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+        <div style="position: absolute; width: 26px; height: 26px; border-radius: 9999px; background-color: rgba(245, 158, 11, 0.4);"></div>
+        <div style="width: 14px; height: 14px; border-radius: 9999px; background-color: #d97706; border: 2.5px solid #ffffff; box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.25);"></div>
       </div>
     `;
 
@@ -149,7 +149,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
         }" style="transform: translate(-50%, -100%);">
           <div class="bg-white rounded-xl shadow-md border ${
             isSelected
-              ? 'border-blue-600 ring-3 ring-blue-500/30'
+              ? 'border-amber-500 ring-3 ring-amber-400/30'
               : 'border-slate-200 hover:border-slate-300'
           } p-1.5 flex items-center gap-1.5 min-w-[125px] max-w-[175px]">
             <img
@@ -167,7 +167,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
             </div>
           </div>
           <div class="w-2 h-2 bg-white rotate-45 mx-auto -mt-1 border-r border-b ${
-            isSelected ? 'border-blue-600' : 'border-slate-200'
+            isSelected ? 'border-amber-500' : 'border-slate-200'
           }"></div>
         </div>
       `;

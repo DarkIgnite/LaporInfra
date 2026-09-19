@@ -21,17 +21,26 @@ import {
   Check,
   Radio,
   SlidersHorizontal,
-  Compass
+  Compass,
+  X,
+  Crown,
+  Maximize2,
+  Copy
 } from 'lucide-react';
 import { InfrastructureReport, SeverityLevel, DamageCategory } from '../types';
 import { GoogleInfrastructureMap } from './GoogleInfrastructureMap';
+import { ReportStatusTracker } from './ReportStatusTracker';
+import { SuperAdminEditModal } from './SuperAdminEditModal';
+import { useAuth } from '../context/AuthContext';
 import {
   getSeverityStyle,
   getStatusStyle,
   calculateDistanceKm,
   formatDistance,
   formatTimeAgo,
-  shareReport
+  shareReport,
+  formatIndonesianDate,
+  getReportShareUrl
 } from '../utils/helpers';
 import {
   detectPreciseUserLocation,
@@ -45,13 +54,19 @@ interface DamageMapProps {
   reports: InfrastructureReport[];
   onSelectReport: (reportId: string) => void;
   onOpenReportModal: () => void;
+  onReportsUpdated?: () => void;
 }
 
 export const DamageMap: React.FC<DamageMapProps> = ({
   reports,
   onSelectReport,
   onOpenReportModal,
+  onReportsUpdated,
 }) => {
+  const { userProfile } = useAuth();
+  const isSuperAdmin = userProfile?.role === 'super_admin';
+  const [isSuperAdminEditOpen, setIsSuperAdminEditOpen] = useState(false);
+
   const [severityFilter, setSeverityFilter] = useState<string>('Semua');
   const [categoryFilter, setCategoryFilter] = useState<string>('Semua');
   const [statusFilter, setStatusFilter] = useState<string>('Semua');
@@ -63,6 +78,15 @@ export const DamageMap: React.FC<DamageMapProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
   const [locationToast, setLocationToast] = useState<string | null>(null);
+
+  const handleShareReport = async (rep: InfrastructureReport) => {
+    const url = getReportShareUrl(rep.id);
+    await shareReport(
+      `LaporInfra: ${rep.kategori} - ${rep.ticketNumber}`,
+      `Laporan kerusakan di ${rep.location.address}`,
+      url
+    );
+  };
 
   // Detect user geolocation with high accuracy
   const handleDetectLocation = useCallback(async (isManual = false) => {
@@ -291,7 +315,7 @@ export const DamageMap: React.FC<DamageMapProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onSelectReport(report.id);
+                          setSelectedReportOnMap(report);
                         }}
                         className="text-amber-700 font-bold hover:underline"
                       >
@@ -339,6 +363,190 @@ export const DamageMap: React.FC<DamageMapProps> = ({
           heightClass="h-full"
           radarRadiusMeters={radiusMeters}
         />
+
+        {/* RIGHT SIDE REPORT DETAIL POPUP DRAWER */}
+        {selectedReportOnMap && (
+          <div className="absolute top-0 right-0 bottom-0 z-30 w-full sm:w-[420px] md:w-[450px] bg-white border-l border-stone-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-stone-200 bg-stone-50/90 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                  {selectedReportOnMap.ticketNumber}
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusStyle(selectedReportOnMap.status).badge}`}>
+                  {selectedReportOnMap.status}
+                </span>
+                {isSuperAdmin && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-amber-800 bg-amber-100 border border-amber-300 rounded px-1.5 py-0.2">
+                    <Crown className="h-2.5 w-2.5 text-amber-600" />
+                    ADMIN
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {isSuperAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setIsSuperAdminEditOpen(true)}
+                    className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:from-amber-600 hover:to-orange-700 transition-all"
+                    title="Super Admin: Edit Laporan"
+                  >
+                    <Crown className="h-3 w-3 text-amber-100" />
+                    <span>Edit</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedReportOnMap(null)}
+                  className="rounded-full p-1.5 text-stone-400 hover:bg-stone-200 hover:text-stone-700 transition-colors"
+                  title="Tutup Detail"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Drawer Content */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Photo Display */}
+              <div className="relative rounded-2xl overflow-hidden bg-stone-900 border border-stone-200 group">
+                <img
+                  src={selectedReportOnMap.imageUrl}
+                  alt={selectedReportOnMap.kategori}
+                  className="w-full h-52 object-cover"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-2.5 left-2.5">
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold text-white shadow-md"
+                    style={{ backgroundColor: getSeverityStyle(selectedReportOnMap.tingkat_keparahan).colorHex }}
+                  >
+                    <AlertTriangle className="h-3 w-3" />
+                    <span>{selectedReportOnMap.tingkat_keparahan}</span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onSelectReport(selectedReportOnMap.id)}
+                  className="absolute bottom-2.5 right-2.5 rounded-full bg-black/70 backdrop-blur-xs p-1.5 text-white hover:bg-black transition-colors"
+                  title="Buka Modal Penuh"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {/* Title & Reporter */}
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-stone-900">{selectedReportOnMap.kategori}</h3>
+                <p className="text-xs text-stone-500">
+                  Dilaporkan oleh <span className="font-semibold text-stone-700">{selectedReportOnMap.reporterName || 'Warga'}</span> &bull; {formatIndonesianDate(selectedReportOnMap.createdAt)}
+                </p>
+              </div>
+
+              {/* Location Details & Navigation */}
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-stone-800 leading-snug">{selectedReportOnMap.location.address}</p>
+                    <p className="text-[10px] text-stone-500 font-mono mt-0.5">
+                      {selectedReportOnMap.location.lat.toFixed(5)}, {selectedReportOnMap.location.lng.toFixed(5)}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedReportOnMap.location.lat},${selectedReportOnMap.location.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-800 hover:underline"
+                >
+                  <Navigation className="h-3.5 w-3.5" />
+                  <span>Petunjuk Rute Google Maps &rarr;</span>
+                </a>
+              </div>
+
+              {/* AI Analysis Box */}
+              <div className="rounded-2xl border border-amber-200/80 bg-linear-to-br from-amber-50/50 via-white to-stone-50 p-3.5 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  <span>Analisis AI Gemini</span>
+                </div>
+                <p className="text-xs text-stone-700 leading-relaxed bg-white p-2.5 rounded-xl border border-stone-200/70">
+                  {selectedReportOnMap.deskripsi_otomatis}
+                </p>
+                <p className="text-[11px] text-stone-600 bg-amber-50/60 p-2 rounded-xl border border-amber-200/50">
+                  <span className="font-bold text-amber-900">Rekomendasi Tindakan: </span>
+                  {selectedReportOnMap.rekomendasi_prioritas}
+                </p>
+              </div>
+
+              {/* Citizen Note */}
+              {selectedReportOnMap.deskripsi_manual && (
+                <div className="rounded-2xl border border-stone-200 bg-white p-3 space-y-1">
+                  <p className="text-xs font-bold text-stone-700">Catatan Pelapor:</p>
+                  <p className="text-xs text-stone-600 italic bg-stone-50 p-2.5 rounded-xl">
+                    &ldquo;{selectedReportOnMap.deskripsi_manual}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Dinas PU Note */}
+              {selectedReportOnMap.dinasNotes && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-3 space-y-1">
+                  <p className="text-xs font-bold text-amber-900">Catatan Dinas PU:</p>
+                  <p className="text-xs text-amber-800 bg-white p-2.5 rounded-xl border border-amber-200/50">
+                    {selectedReportOnMap.dinasNotes}
+                  </p>
+                </div>
+              )}
+
+              {/* Status Timeline */}
+              <div className="rounded-2xl border border-stone-200 bg-white p-3.5 space-y-2">
+                <p className="text-xs font-bold text-stone-800">Alur Progres Penanganan:</p>
+                <ReportStatusTracker report={selectedReportOnMap} />
+              </div>
+            </div>
+
+            {/* Bottom Drawer Actions */}
+            <div className="p-3 border-t border-stone-200 bg-stone-50 flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => onSelectReport(selectedReportOnMap.id)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition-all shadow-xs"
+              >
+                <Eye className="h-3.5 w-3.5 text-amber-400" />
+                <span>Buka Detail Penuh</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleShareReport(selectedReportOnMap)}
+                className="flex items-center justify-center gap-1 py-2.5 px-4 rounded-full border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 text-xs font-semibold transition-colors"
+                title="Bagikan Tautan Laporan"
+              >
+                <Share2 className="h-3.5 w-3.5 text-amber-600" />
+                <span>Bagikan</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Super Admin Edit Modal if opened */}
+        {isSuperAdmin && selectedReportOnMap && (
+          <SuperAdminEditModal
+            report={selectedReportOnMap}
+            isOpen={isSuperAdminEditOpen}
+            onClose={() => setIsSuperAdminEditOpen(false)}
+            onSaved={(updated) => {
+              setSelectedReportOnMap(updated);
+              if (onReportsUpdated) onReportsUpdated();
+            }}
+            onDeleted={() => {
+              setSelectedReportOnMap(null);
+              if (onReportsUpdated) onReportsUpdated();
+            }}
+          />
+        )}
       </div>
     </div>
   );

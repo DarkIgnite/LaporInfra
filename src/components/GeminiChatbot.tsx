@@ -690,7 +690,7 @@ export function GeminiChatbot({
         {!hasMessages ? (
           /* ── Empty state (ChatGPT-style welcome) ── */
           <div className="flex flex-col items-center justify-center h-full px-4 py-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/25 mb-5">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500 shadow-lg shadow-amber-500/25 mb-5">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1.5">
@@ -708,9 +708,9 @@ export function GeminiChatbot({
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(prompt)}
-                    className="flex items-start gap-3 text-left p-3.5 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all group shadow-sm"
+                    className="flex items-start gap-3 text-left p-3.5 rounded-xl border border-gray-200 hover:border-amber-400 hover:bg-amber-50 transition-all group shadow-sm"
                   >
-                    <ChipIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 mt-0.5 shrink-0 transition-colors" />
+                    <ChipIcon className="h-4 w-4 text-gray-400 group-hover:text-amber-600 mt-0.5 shrink-0 transition-colors" />
                     <span className="text-sm text-gray-700 group-hover:text-gray-900 leading-snug">
                       {prompt}
                     </span>
@@ -738,7 +738,7 @@ export function GeminiChatbot({
                 >
                   {/* Bot avatar */}
                   {!isUser && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm mt-0.5">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white shadow-sm mt-0.5">
                       <Bot className="h-4 w-4" />
                     </div>
                   )}
@@ -747,7 +747,7 @@ export function GeminiChatbot({
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       isUser
-                        ? 'bg-blue-600 text-white rounded-br-sm shadow-sm'
+                        ? 'bg-amber-500 text-white rounded-br-sm shadow-sm'
                         : msg.isError
                         ? 'bg-red-50 text-red-900 border border-red-200 rounded-bl-sm shadow-sm'
                         : 'bg-gray-100 text-gray-800 rounded-bl-sm shadow-sm'
@@ -756,7 +756,7 @@ export function GeminiChatbot({
                     {/* Bot message header (model badge + copy) */}
                     {!isUser && (
                       <div className="flex items-center justify-between gap-2 mb-2 text-[10px] text-gray-400">
-                        <span className="font-semibold text-blue-600">
+                        <span className="font-semibold text-amber-600">
                           {msg.roleMode ? ROLE_PRESETS[msg.roleMode]?.shortTitle : 'LaporInfra AI'}
                         </span>
                         <div className="flex items-center gap-1.5">
@@ -878,7 +878,7 @@ export function GeminiChatbot({
                     )}
 
                     {/* Timestamp */}
-                    <div className={`text-[10px] mt-1.5 ${isUser ? 'text-blue-100 text-right' : 'text-gray-400'}`}>
+                    <div className={`text-[10px] mt-1.5 ${isUser ? 'text-amber-100 text-right' : 'text-gray-400'}`}>
                       {msg.timestamp}
                     </div>
                   </div>
@@ -900,11 +900,11 @@ export function GeminiChatbot({
                 animate={{ opacity: 1, y: 0 }}
                 className="flex gap-3 items-start justify-start"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white shadow-sm">
                   <Bot className="h-4 w-4" />
                 </div>
                 <div className="rounded-2xl rounded-bl-sm px-4 py-3 bg-gray-100 text-sm text-gray-500 flex items-center gap-2 shadow-sm">
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
                   <span>
                     {roleMode === 'complex'
                       ? 'Insinyur AI sedang menganalisis standar struktural & RAB...'
@@ -956,12 +956,12 @@ export function GeminiChatbot({
                           key={mode}
                           onClick={() => handleRoleChange(mode)}
                           className={`w-full px-3 py-2 text-left text-xs flex items-start gap-2.5 hover:bg-gray-50 transition-colors ${
-                            isSelected ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                            isSelected ? 'bg-amber-50 text-amber-800' : 'text-gray-700'
                           }`}
                         >
                           <ModeIcon
                             className={`h-4 w-4 mt-0.5 shrink-0 ${
-                              isSelected ? 'text-blue-500' : 'text-gray-400'
+                              isSelected ? 'text-amber-600' : 'text-gray-400'
                             }`}
                           />
                           <div className="flex-1 min-w-0">
@@ -988,7 +988,7 @@ export function GeminiChatbot({
                   type="checkbox"
                   checked={enableMaps}
                   onChange={(e) => setEnableMaps(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+                  className="rounded border-gray-300 text-amber-600 focus:ring-amber-500 h-3.5 w-3.5"
                 />
                 <span>Maps Grounding</span>
               </label>
@@ -996,7 +996,7 @@ export function GeminiChatbot({
               <button
                 onClick={handleGetLocation}
                 disabled={isLocating}
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="flex items-center gap-1 text-amber-600 hover:text-amber-700 font-medium transition-colors"
               >
                 {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Compass className="h-3 w-3" />}
                 <span className="hidden sm:inline">{locationName ? locationName : 'Deteksi GPS'}</span>
@@ -1033,13 +1033,13 @@ export function GeminiChatbot({
                   : 'Tanyakan tentang laporan, peta kerusakan, atau cara melapor...'
               }
               disabled={isLoading}
-              className="flex-1 px-4 py-3 bg-gray-100 rounded-2xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-200 transition-all disabled:opacity-50"
+              className="flex-1 px-4 py-3 bg-gray-100 rounded-2xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white border border-transparent focus:border-amber-300 transition-all disabled:opacity-50"
             />
 
             <button
               type="submit"
               disabled={!inputMessage.trim() || isLoading}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white hover:bg-amber-600 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-amber-500/20"
             >
               <Send className="h-4 w-4" />
             </button>
