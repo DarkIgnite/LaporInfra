@@ -380,16 +380,106 @@ html.dark .apple-glass-card {
   box-shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.6) !important;
 }
 
+/* ==========================================================================
+   Leaflet Maps Dark Mode (Zero API Key - Standard OSM Tile Inversion)
+   ========================================================================== */
+html.dark .leaflet-tile-pane,
+.dark-map-tiles .leaflet-tile-pane {
+  filter: brightness(0.68) invert(1) contrast(2.3) hue-rotate(195deg) saturate(0.25) brightness(0.88) !important;
+}
+
+/* Retain true satellite imagery colors in dark mode */
+.satellite-map-tiles .leaflet-tile-pane,
+html.dark .satellite-map-tiles .leaflet-tile-pane {
+  filter: none !important;
+}
+
+/* Ensure markers, popups, and controls are never inverted */
+.leaflet-marker-pane,
+.leaflet-popup-pane,
+.leaflet-control-container,
+.leaflet-overlay-pane {
+  filter: none !important;
+}
+
 /* Leaflet Maps Dark Mode Tuning */
 html.dark .custom-popup .leaflet-popup-content-wrapper {
   background: #303134 !important;
   color: #e8eaed !important;
   border: 1px solid #3c4043 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
 }
 
 html.dark .custom-popup .leaflet-popup-tip {
   background: #303134 !important;
+}
+
+/* ==========================================================================
+   Comprehensive Dark Mode Surface Polish (Elevated Google Dark Grey)
+   ========================================================================== */
+
+/* Cards, Modals & Dropdown Containers */
+html.dark [role="dialog"],
+html.dark .modal-content,
+html.dark [data-radix-popper-content-wrapper] > div {
+  background-color: #303134 !important;
+  border-color: #3c4043 !important;
+  color: #e8eaed !important;
+}
+
+/* Table Header & Hover Rows (Admin Dashboard) */
+html.dark thead {
+  background-color: #28292c !important;
+}
+html.dark thead th {
+  color: #9aa0a6 !important;
+  border-bottom-color: #3c4043 !important;
+}
+html.dark tbody tr {
+  border-bottom-color: #3c4043 !important;
+}
+html.dark tbody tr:hover,
+html.dark tr.hover\:bg-stone-50\/80:hover {
+  background-color: #35373a !important;
+}
+
+/* Header, Drawer & Navigation Bars */
+html.dark header,
+html.dark nav {
+  background-color: #202124 !important;
+  border-color: #3c4043 !important;
+}
+
+html.dark footer {
+  background-color: #202124 !important;
+  border-color: #3c4043 !important;
+  color: #9aa0a6 !important;
+}
+
+/* Chatbot Dark Mode Tuning */
+html.dark .chatbot-message-bot {
+  background-color: #3c4043 !important;
+  color: #e8eaed !important;
+  border-color: #4a4d51 !important;
+}
+
+/* Semi-transparent Tinted Panels */
+html.dark .bg-stone-50\/90,
+html.dark .bg-stone-50\/80,
+html.dark .bg-stone-50\/60,
+html.dark .bg-gray-50\/60,
+html.dark .bg-stone-50,
+html.dark .bg-gray-50 {
+  background-color: #202124 !important;
+}
+
+/* Amber button text clarity in dark mode */
+html.dark .bg-amber-500 {
+  background-color: #f59e0b !important;
+  color: #ffffff !important;
+}
+html.dark .bg-amber-500:hover {
+  background-color: #d97706 !important;
 }
 
 /* Dark Mode Scrollbars (Google Style) */

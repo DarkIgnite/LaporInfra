@@ -51,13 +51,13 @@ const TILE_PROVIDERS: Record<MapTileStyle, { url: string; attribution: string; l
     label: 'Peta Jalan'
   },
   dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; CartoDB & OpenStreetMap',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
     label: 'Radar Gelap'
   },
   light: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; CartoDB & OpenStreetMap',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
     label: 'Minimalis'
   },
   satellite: {
@@ -503,7 +503,12 @@ export const InteractiveLandingMap: React.FC<InteractiveLandingMapProps> = ({
         
         {/* Leaflet Map Box */}
         <div className="relative flex-1 h-full w-full">
-          <div ref={mapContainerRef} className="w-full h-full z-0" />
+          <div
+            ref={mapContainerRef}
+            className={`w-full h-full z-0 ${
+              mapStyle === 'dark' || (mapStyle !== 'satellite' && isDark) ? 'dark-map-tiles' : ''
+            } ${mapStyle === 'satellite' ? 'satellite-map-tiles' : ''}`}
+          />
 
           {/* Floating Zoom Controls on Top-Right */}
           <div className="absolute top-4 right-4 z-10 flex flex-col gap-1.5">

@@ -67,13 +67,8 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
         attributionControl: false
       });
 
-      const initialTileUrl = isDark
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-      const initialLayer = L.tileLayer(initialTileUrl, {
+      const initialLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        subdomains: 'abcd',
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
@@ -88,27 +83,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
       leafletMapRef.current = map;
       leafletMarkersRef.current = L.layerGroup().addTo(map);
     }
-  }, [defaultCenter, onMapClick, isDark]);
-
-  // Dynamically update tile layer when theme changes
-  useEffect(() => {
-    if (!leafletMapRef.current) return;
-    const map = leafletMapRef.current;
-    if (tileLayerRef.current) {
-      map.removeLayer(tileLayerRef.current);
-    }
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-    const newLayer = L.tileLayer(tileUrl, {
-      maxZoom: 19,
-      subdomains: 'abcd',
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    tileLayerRef.current = newLayer;
-  }, [isDark]);
+  }, [defaultCenter, onMapClick]);
 
   // Update User Location Marker and Radar
   useEffect(() => {
@@ -248,7 +223,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
   };
 
   return (
-    <div className={`relative isolate z-0 w-full ${heightClass} bg-slate-50 overflow-hidden select-none font-sans`}>
+    <div className={`relative isolate z-0 w-full ${heightClass} bg-slate-50 dark:bg-[#202124] overflow-hidden select-none font-sans`}>
       <div ref={leafletContainerRef} className="w-full h-full" />
 
       {/* Floating Map Controls on Top-Right */}
@@ -258,22 +233,22 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
           id="gmap-locate-btn"
           onClick={handleLocateClick}
           title="Pusatkan ke Lokasi Saya (GPS)"
-          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm border transition-all active:scale-95 ${
+          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white dark:bg-[#303134] shadow-sm border transition-all active:scale-95 ${
             isLocating
-              ? 'border-amber-500 text-amber-600 bg-amber-50/90 ring-2 ring-amber-400/30'
-              : 'border-slate-200/80 text-slate-700 hover:bg-amber-50/50 hover:text-amber-600'
+              ? 'border-amber-500 text-amber-600 bg-amber-50/90 dark:bg-amber-950/40 ring-2 ring-amber-400/30'
+              : 'border-slate-200/80 dark:border-[#3c4043] text-slate-700 dark:text-[#e8eaed] hover:bg-amber-50/50 dark:hover:bg-[#3c4043] hover:text-amber-600'
           }`}
         >
           <Crosshair className={`h-4 w-4 ${isLocating ? 'animate-spin text-amber-600' : ''}`} />
         </button>
 
         {/* Zoom Controls */}
-        <div className="flex flex-col rounded-xl bg-white shadow-sm border border-slate-200/80 overflow-hidden">
+        <div className="flex flex-col rounded-xl bg-white dark:bg-[#303134] shadow-sm border border-slate-200/80 dark:border-[#3c4043] overflow-hidden">
           <button
             id="gmap-zoom-in"
             onClick={handleZoomIn}
             title="Perbesar Peta"
-            className="flex h-8 w-8 items-center justify-center text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors border-b border-slate-100"
+            className="flex h-8 w-8 items-center justify-center text-slate-700 dark:text-[#e8eaed] hover:bg-slate-50 dark:hover:bg-[#3c4043] active:bg-slate-100 transition-colors border-b border-slate-100 dark:border-[#3c4043]"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -281,7 +256,7 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
             id="gmap-zoom-out"
             onClick={handleZoomOut}
             title="Perkecil Peta"
-            className="flex h-8 w-8 items-center justify-center text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            className="flex h-8 w-8 items-center justify-center text-slate-700 dark:text-[#e8eaed] hover:bg-slate-50 dark:hover:bg-[#3c4043] active:bg-slate-100 transition-colors"
           >
             <Minus className="h-4 w-4" />
           </button>
@@ -290,12 +265,12 @@ export const GoogleInfrastructureMap: React.FC<GoogleInfrastructureMapProps> = (
 
       {/* Floating Live Location Indicator Badge on Bottom-Left */}
       {userLocation && (
-        <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs text-xs font-semibold text-slate-700">
+        <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-2 bg-white/95 dark:bg-[#303134]/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#3c4043] shadow-xs text-xs font-semibold text-slate-700 dark:text-[#e8eaed]">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
           </span>
-          <span className="max-w-[200px] truncate text-[11px] font-medium text-slate-600">
+          <span className="max-w-[200px] truncate text-[11px] font-medium text-slate-600 dark:text-[#9aa0a6]">
             {userLocation.address || 'Pusat Area Pantauan'}
           </span>
         </div>
