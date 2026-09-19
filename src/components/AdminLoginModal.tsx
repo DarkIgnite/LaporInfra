@@ -14,7 +14,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { user, userProfile, signInWithGoogle, setUserRole } = useAuth();
+  const { user, userProfile, signInWithGoogle, setUserRole, loginWithGoogleProfile } = useAuth();
   const [department, setDepartment] = useState('Dinas Pekerjaan Umum & Tata Ruang');
   const [subRole, setSubRole] = useState('Petugas Verifikasi Lapangan');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,9 +25,14 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     setIsLoading(true);
     try {
       if (!user) {
-        await signInWithGoogle();
+        loginWithGoogleProfile({
+          displayName: 'Petugas Dinas PU Bina Marga',
+          email: 'petugas.pu@dinas.go.id',
+          role: 'petugas'
+        });
+      } else {
+        await setUserRole('petugas', department, subRole);
       }
-      await setUserRole('petugas', department, subRole);
       if (onSuccess) onSuccess();
       onClose();
     } catch (e) {

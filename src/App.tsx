@@ -16,6 +16,7 @@ import { CreateReportModal } from './components/CreateReportModal';
 import { ReportDetailModal } from './components/ReportDetailModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { SDGInfoModal } from './components/SDGInfoModal';
+import { GoogleSignInModal } from './components/GoogleSignInModal';
 import { InfrastructureReport, AdminUser } from './types';
 import { fetchReports, subscribeToReports } from './services/api';
 import { SEED_REPORTS } from './data/seedReports';
@@ -23,7 +24,7 @@ import { Building2, Sparkles, X } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 
 export default function App() {
-  const { user, userProfile, signInWithGoogle, setUserRole } = useAuth();
+  const { user, userProfile, signInWithGoogle, setUserRole, isGoogleModalOpen, setIsGoogleModalOpen } = useAuth();
   const [activeTab, setActiveTab] = useState<'beranda' | 'radar' | 'peta' | 'laporan' | 'admin' | 'asisten'>('beranda');
   const [reports, setReports] = useState<InfrastructureReport[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -346,6 +347,11 @@ export default function App() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={() => setActiveTab('admin')}
+      />
+
+      <GoogleSignInModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
       />
 
       <SDGInfoModal
